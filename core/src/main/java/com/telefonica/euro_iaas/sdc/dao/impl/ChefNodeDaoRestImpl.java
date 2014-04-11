@@ -179,6 +179,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             InputStream inputStream = wr.put(InputStream.class);
             String stringNode;
             stringNode = IOUtils.toString(inputStream);
+            LOGGER.info ("result update" + stringNode);
             JSONObject jsonNode = JSONObject.fromObject(stringNode);
 
             ChefNode updatedNode = new ChefNode();
