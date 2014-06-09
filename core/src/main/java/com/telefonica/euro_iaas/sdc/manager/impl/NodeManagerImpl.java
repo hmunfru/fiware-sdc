@@ -72,7 +72,7 @@ public class NodeManagerImpl implements NodeManager {
      * @see com.telefonica.euro_iaas.sdc.manager.ChefClientManager#chefNodeDelete (java.lang.String, java.lang.String)
      */
     public void nodeDelete(String vdc, String nodeName, String token) throws NodeExecutionException {
-
+    	log.info("Node delete " + nodeName + " " + vdc);
         try {
 
             puppetDelete(vdc, nodeName, token);
@@ -136,17 +136,19 @@ public class NodeManagerImpl implements NodeManager {
     }
 
     private void chefClientDelete(String vdc, String chefClientName, String token) throws ChefClientExecutionException {
-        ChefNode node;
-        List<ProductInstance> productInstances = null;
-        String hostname = null;
+        log.info ("chefClientDelete " +chefClientName );
+    	ChefNode node;
+
         try {
             // Eliminacion del nodo
             node = chefNodeDao.loadNode(chefClientName, token);
+            log.info("Node " + chefClientName + " loaded ");
             chefNodeDao.deleteNode(node, token);
             log.info("Node " + chefClientName + " deleted from Chef Server");
 
             // eliminacion del chefClient
             chefClientDao.deleteChefClient(chefClientName, token);
+            log.info("Client " + chefClientName + " deleted from Chef Server");
 
         } catch (CanNotCallChefException e) {
             String errorMsg = "Error deleting the Node" + chefClientName + " in Chef server. Description: "
@@ -188,15 +190,18 @@ public class NodeManagerImpl implements NodeManager {
     public ChefClient chefClientload(String chefClientName, String token) throws ChefClientExecutionException,
             EntityNotFoundException {
 
+    	log.debug ("chefClientload " + chefClientName);
         ChefClient chefClient = new ChefClient();
+        
         try {
             chefClient = chefClientDao.getChefClient(chefClientName, token);
+            log.debug ("chef client " );
         } catch (EntityNotFoundException e) {
             // String message = " An error ocurred invoing the Chef server to load ChefClient named " + chefClientName;
             // log.info(message);
             throw e;
         } catch (Exception e) {
-            String message = " An error ocurred invoing the Chef server to load ChefClient named " + chefClientName;
+            String message = " An error ocurred invoing the Chef server to load ChefClient named " + chefClientName + " " + e.getMessage();
             log.info(message);
             throw new ChefClientExecutionException(message, e);
         }

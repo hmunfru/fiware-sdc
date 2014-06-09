@@ -207,6 +207,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
     }
 
     public void deleteNode(ChefNode node, String token) throws CanNotCallChefException {
+    	log.info("Delete node  " + node.getName ()); 
     	String chefServerUrl = null;
 		try {
 			chefServerUrl = openStackRegion.getChefServerEndPoint(token);
@@ -216,7 +217,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         try {
             String path = MessageFormat.format(CHEF_SERVER_NODES_PATH, "/"+node.getName());
             Map<String, String> header = getHeaders("DELETE", path, "");
-
+            log.info ("url " + chefServerUrl + path);
             WebResource webResource = clientConfig.getClient().resource(chefServerUrl + path);
 
             Builder wr = webResource.accept(MediaType.APPLICATION_JSON);
@@ -228,6 +229,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
 
             wr.delete(InputStream.class);
         } catch (UniformInterfaceException e) {
+        	log.debug("Error deleting node " + e.getMessage() );
             throw new CanNotCallChefException(e);
         }
     }

@@ -153,9 +153,11 @@ public class ChefClientDaoRestImpl implements ChefClientDao {
      * @see com.telefonica.euro_iaas.sdc.dao.ChefClientDao#getChefClient(java.lang.String)
      */
     public ChefClient getChefClient(String chefClientName, String token) throws CanNotCallChefException, EntityNotFoundException {
+    	log.info(" getChefClient " + chefClientName);
     	String chefServerUrl = null;
 		try {
 			chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+			log.info(" chefServerUrl " + chefServerUrl);
 		} catch (OpenStackException e) {
 			 throw new SdcRuntimeException(e);
 		}
