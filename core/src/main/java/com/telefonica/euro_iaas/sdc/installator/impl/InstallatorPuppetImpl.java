@@ -75,7 +75,7 @@ public class InstallatorPuppetImpl implements Installator {
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
     	try {
-    	    generateFilesinPuppetMaster (vm, vdc, product, action, token);
+    	    generateFilesinPuppetMaster (vm, vdc, product, action, token, null);
     	} catch (InstallatorException e) {
     		log.warn ("It is not possible to generate the manifests in the puppet master " + e.getMessage());
     		throw new InstallatorException(e.getMessage());
@@ -98,40 +98,9 @@ public class InstallatorPuppetImpl implements Installator {
 
     }
     
-    public void generateFilesinPuppetMaster (VM vm, String vdc, ProductRelease product, String action, String token) 
+    public void generateFilesinPuppetMaster (VM vm, String vdc, ProductRelease product, String action, String token, List<Attribute> attributes) 
     throws InstallatorException {
     	String puppetUrl = null;
-        callPuppetMaster(vm, vdc, product, action, token, null);
-
-    }
-
-
-
-    @Override
-    public void callService(ProductInstance productInstance, VM vm, List<Attribute> attributes, String action,
-            String token) throws InstallatorException, NodeExecutionException {
-        
-        callPuppetMaster(vm, productInstance.getVdc(), productInstance.getProductRelease(), action, token, attributes);
-    }
-
-    @Override
-    public void upgrade(ProductInstance productInstance, VM vm, String token) throws InstallatorException {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void callService(ProductInstance productInstance, String action, String token) throws InstallatorException,
-            NodeExecutionException {
-        // TODO Auto-generated method stub
-
-    }
-
-  
-
-    private void callPuppetMaster(VM vm, String vdc, ProductRelease product, String action, String token,
-            List<Attribute> attributes) throws InstallatorException {
-        String puppetUrl = null;
 
         try {
             puppetUrl = openStackRegion.getPuppetWrapperEndPoint(token);
@@ -208,6 +177,47 @@ public class InstallatorPuppetImpl implements Installator {
             log.error(e1.getMessage());
             throw new InstallatorException(e1);
         }
+    }
+
+
+
+    @Override
+    public void callService(ProductInstance productInstance, VM vm, List<Attribute> attributes, String action,
+            String token) throws InstallatorException, NodeExecutionException {
+        
+        try {
+    	    generateFilesinPuppetMaster (vm, productInstance.getVdc(), productInstance.getProductRelease(), action, token, attributes);
+    	} catch (InstallatorException e) {
+    		log.warn ("It is not possible to generate the manifests in the puppet master " + e.getMessage());
+    		throw new InstallatorException(e.getMessage());
+    	}
+    	
+    	try {
+    		isRecipeExecuted(vm,productInstance.getProductRelease().getProduct().getName(),token);
+        } catch (NodeExecutionException e) {
+            // even if execution fails want to unassign the recipe
+        	log.debug(e.getMessage());
+            throw new NodeExecutionException(e.getMessage());
+        }
+    
+        try {
+			isRecipeExecuted(vm,productInstance.getProductRelease().getProduct().getName(),token);
+		} catch (NodeExecutionException e) {
+			log.warn ("It is not possible execute the module " + productInstance.getProductRelease().getProduct().getName() + " in node " + vm.getHostname() );
+		}
+    }
+
+    @Override
+    public void upgrade(ProductInstance productInstance, VM vm, String token) throws InstallatorException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void callService(ProductInstance productInstance, String action, String token) throws InstallatorException,
+            NodeExecutionException {
+        // TODO Auto-generated method stub
+
     }
     
     public void isRecipeExecuted(VM vm, String module, String token) throws NodeExecutionException, InstallatorException {

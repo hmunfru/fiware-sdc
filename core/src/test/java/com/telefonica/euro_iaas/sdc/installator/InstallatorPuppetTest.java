@@ -154,7 +154,7 @@ public class InstallatorPuppetTest {
     public void testGenerateFilesinPuppetMaster() throws InstallatorException, NodeExecutionException{
         
         when(statusLine.getStatusCode()).thenReturn(200);        
-        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token");
+        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token", null);
     }   
 
     public void testCallService_all_OK() throws InstallatorException, NodeExecutionException {
@@ -167,7 +167,7 @@ public class InstallatorPuppetTest {
     public void testCallService_FAIL() throws InstallatorException, NodeExecutionException, OpenStackException {
 
         when(statusLine.getStatusCode()).thenReturn(500);
-        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token");
+        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token", null);
         puppetInstallator.callService(host, "test", productRelease, "install", "token");
     }
 
@@ -175,7 +175,7 @@ public class InstallatorPuppetTest {
     public void testCallService_1_OK_1_FAIL() throws InstallatorException, NodeExecutionException {
 
         when(statusLine.getStatusCode()).thenReturn(200).thenReturn(500);
-        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token");
+        puppetInstallator.generateFilesinPuppetMaster(host,"test",productRelease, "install", "token", null);
         
     }
     
@@ -246,14 +246,6 @@ public class InstallatorPuppetTest {
         puppetInstallator.loadNode("noexists", "token");
         puppetInstallator.callService(host, "test", productRelease, "install", "token");
 
-    }
-
-    @Test
-    public void testCallService_attributes_all_OK() throws InstallatorException, NodeExecutionException {
-
-        when(statusLine.getStatusCode()).thenReturn(200);
-
-        puppetInstallator.callService(productInstance, host, attributeList,"install", "token");
     }
 
 }
