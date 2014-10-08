@@ -149,7 +149,7 @@ public abstract class AbstractInstallableService extends AbstractBaseService {
         Builder builder = webResource.accept(getType()).type(getType());
         builder.header("X-Auth-Token", token);
         builder.header("Tenant-Id", tenant);
-
+    
         String txId = MDC.get("txId");
         if (txId != null) {
             builder.header("txId", tenant);

@@ -30,6 +30,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.telefonica.euro_iaas.sdc.client.services.SdcClientConfig;
+import com.telefonica.euro_iaas.sdc.model.Task;
 
 
 /**
@@ -101,6 +102,5 @@ public class AbstractBaseService {
     	builder.header("Tenant-Id", tenant);
         return builder;
     }
-
 
 }
