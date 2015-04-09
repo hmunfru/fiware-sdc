@@ -933,7 +933,7 @@ In the sdc machine, it is required to copy this private key in
 Register SDC application into keystone
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The last step involves to regiter the SDC and chef-server endpoints into
+The last step involves to regiter the SDC, chef-server, puppetwrapper and puppetmaster endpoints into
 the keystone endpoint catalogue. To do that, you should write into the
 config.js in the keystone-proxy the following lines:
 
@@ -960,6 +960,28 @@ config.js in the keystone-proxy the following lines:
         "endpoints_links": [],
         "type": "chef-server",
         "name": "chef-server"
+    },
+    {"endpoints": [
+        {"adminURL": "https://130.206.81.91:8443/puppetwrapper/"
+         "region": "myregion"
+         "internalURL": "https://130.206.81.91:8443/puppetwrapper/"
+         "publicURL": "https://130.206.81.91:8443/puppetwrapper/"
+        }
+        ],
+        "endpoints_links": [],
+        "type": "puppetwrapper",
+        "name": "puppetwrapper"
+    },
+    {"endpoints": [
+        {"adminURL": "puppet-master.dev-havana.fi-ware.org"
+         "region": "myregion"
+         "internalURL": "puppet-master.dev-havana.fi-ware.org"
+         "publicURL": "puppet-master.dev-havana.fi-ware.org"
+        }
+        ],
+        "endpoints_links": [],
+        "type": "puppetmaster",
+        "name": "puppetmaster"
     },
 
 where myregion should be the name of the openstack region defined.
