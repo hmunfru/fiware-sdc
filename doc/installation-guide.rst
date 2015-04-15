@@ -24,7 +24,7 @@ Installation  (for CentOS)
 ==========================
 
 Install SDC from RPM
------------------------------
+--------------------
   
 The SDC is packaged as RPM and stored in the rpm repository. Thus, the first thing to do is to create a file 
 in /etc/yum.repos.d/fiware.repo, with the following content.
@@ -53,7 +53,7 @@ to install a specific SDC version where {version} could be "2.6.0"
 
 
 Install SDC from source
---------------------------------
+-----------------------
 
 Requirements: To install SDC from source it is required to have the following software installed in your host
 previously:
@@ -189,7 +189,7 @@ in this example we have
 
 	chef-server-url = https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-server-11.1.6-1.el6.x86_64.rpm
 
-In case you do not have w-get installed on your syste, please type yum install wget to install it. We can just execute
+In case you do not have wget installed on your syste, please type yum install wget to install it. We can just execute
 
 .. code::
 
@@ -307,429 +307,8 @@ example:
 Puppet
 ~~~~~~
 
-Puppet Master Installation (Centos 6.5)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Type the following commands
-
-.. code ::
-     
-     sudo rpm -ivh https://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-7.noarch.rpm
-     yum install puppet
-     puppet master
-     sudo puppet apply -e 'service { "puppet": enable => true, }'
-     chmod -R 777 /etc/puppet/manifests
-     chmod -R 777 /etc/puppet/modules
-
-create file /etc/puppet/autosign.conf - master's whitelist - with content like:
-
-.. code ::
-
-     *.novalocal
-     *.openstacklocal
-
-Installing Puppet DB (Centos 6.5)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The puppet master needs to have the puppetdb installed and configured in order to be able to persistent all data in a database. To do that
-
-.. code ::
-
-     yum install puppetdb puppetdb-terminus
-     chkconfig puppetdb on
-
-configure Puppet master to use storeconfigs
-
-.. code ::
-
-     vi /etc/puppet/puppet.conf 
-     
-and add following into [master] section:
-
-
-.. code ::
-
-     storeconfigs = true
-     storeconfigs_backend = puppetdb
-
-Configure PuppetDB to use the correct puppet master hostname and port
-
-.. code ::
-
-     vi /etc/puppet/puppetdb.conf 
-
-and add following into [main] section.
-
-.. code ::
-
-     server = your-server-name
-     port = 8081
-
-Note that the your-server-name used has to resolve via DNS, or otherwise add it in puppet agent hosts in /etc/hosts If the server name is other than
-the hostname, a puppet master configuration change will be needed in puppet.conf, a certname value must be defined (see puppet documentation)
-
-Restart Puppet master to apply settings (Note: these operations may take about two minutes. You can ensure that PuppetDB is running by
-executing telnet your-domain-name 8081):
-Restart puppet master process, then:
-
-.. code ::
-
-     puppetdb-ssl-setup  (or puppetdb ssl-setup)
-
-Restart puppet master process, then:
-
-.. code ::
-
-     service puppetdb restart
-
-
-Install postgreSQL (on Centos as root)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. code ::
-
-     yum install postgresql-server
-     service postgresql initdb
-     service postgresql start
-
-Before using the PostgreSQL backend, you must set up a PostgreSQL server, ensure that it will accept incoming 
-connections, create a user for PuppetDB to use when connecting, and create a database for PuppetDB. Completely 
-configuring PostgreSQL is beyond the scope of this manual, but if you are logged in as root on a running Postgres 
-server, you can create a user and database as follows:
-
-.. code ::
-
-     sudo -u postgres sh
-     createuser -DRSP puppetdb
-     createdb -E UTF8 -O puppetdb puppetdb
-     exit
-
-If you are running PostgreSQL 9.3 or above you should install the regexp optimized index extension pg_trgm:
-
-.. code ::
-
-     sudo -u postgres sh
-     psql puppetdb -c 'create extension pg_trgm'
-     exit
-
-Next you will most likely need to modify the pg_hba.conf file to allow for md5 authentication from at least localhost. 
-To locate the file you can either issue a locate pg_hba.conf command (if your distribution supports it) or 
-consult your distribution’s documentation for the PostgreSQL confdir.
-
-The following example pg_hba.conf file allows md5 authentication from localhost for both IPv4 and IPv6 connections:
-
-.. code::
-
-     #TYPE DATABASE USER CIDR-ADDRESS METHOD
-     local all      all                md5
-     host  all      all  127.0.0.1/32  md5
-     host  all      all  ::1/128       md5
-
-Restart PostgreSQL and ensure you can log in by running:
-
-.. code ::
-
-     $ sudo service postgresql restart
-     $ psql -h localhost puppetdb puppetdb
-
-To configure PuppetDB to use this database, put the following in the [database] section in file puppetdb.conf:
-
-.. code ::
-
-     classname = org.postgresql.Driver 
-     subprotocol = postgresql 
-     subname = //<HOST>:<PORT>/<DATABASE> 
-     username = <USERNAME>
-     password = <PASSWORD> 
-
-Replace <HOST> with the DB server’s hostname. Replace <PORT> with the port on which PostgreSQL is listening.
-Replace <DATABASE> with the name of the database you’ve created for use with PuppetDB.
-
-Installing hiera
-^^^^^^^^^^^^^^^^
-
-install hiera package in the machine where puppet master is installed
-
-.. code ::
-
-     sudo puppet resource package hiera ensure=installed
-
-install puppet functions
-
-.. code ::
-
-     sudo puppet resource package hiera-puppet ensure=installed
-
-Note: If you are using Puppet 3 or later, you probably already have Hiera installed. You can skip the above steps, and go directly to the following:
-execute
-
-.. code ..
-
-     cd /etc/puppet
-     mkdir hieradata
-     cd hieradata
-     mkdir node
-
-create $confdir/hiera.yaml (normally /etc/puppet/hiera.yaml) with content:
-
-.. code ::
-
-     :backends:
-     - yaml
-     :yaml:
-     :datadir: /etc/puppet/hieradata
-     :hierarchy:
-     - "node/%{::fqdn}"
-     - common
-
-Install mongodb
-^^^^^^^^^^^^^^^
-
-Create a /etc/yum.repos.d/mongodb.repo file to hold the following configuration information for the MongoDB 
-repository: 64-bit system: 
-
-.. code::
-
-     [mongodb]
-     name=MongoDB Repository
-     baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-     gpgcheck=0
-     enabled=1
-
-32-bit system: 
-
-.. code::
-     
-     [mongodb]
-     name=MongoDB Repository
-     baseurl=http://downloads-distro.mongodb.org/repo/redhat/os/i686/
-     gpgcheck=0
-     enabled=1
-
-On Centos execute as root: 
-
-.. code::
-
-     sudo yum install -y mongodb-org
-
-change mongo configuration  add in /etc/mongod.conf: 
-
-.. code::
-
-     smallfiles=true
-
-Start the mongodb 
-
-.. code::
-
-     sudo service mongod start
-
-
-Install PuppetWtapper from RPM
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  
-The PuppetWrapper is packaged as RPM and stored in the rpm repository. Thus, the first thing to do is to create a file 
-in /etc/yum.repos.d/fiware.repo, with the following content.
-
- .. code::
- 
-	[Fiware]
-	name=FIWARE repository
-	baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
-	gpgcheck=0
-	enabled=1
-    
-After that, you can install the SDC just doing:
-
-.. code::
-
-	yum install fiware-puppetwrapper
-
-or specifying the version
-
-.. code::
-
-	yum install fiware-wrapper-{version}-1.noarch
-
-to install a specific PuppetWrapper version where {version} could be "3.3.0"
-
-Install PuppetWrapper from source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Requirements: To install Puppet Wrapper from source it is required to have the following software installed in your host
-previously:
-
-- git
-
-- java 1.7
-
-- maven
-
-Here we include a small guide to install the required software. If you find any problem in the installation process,
-please refer to the official sites:
-
-Install git
-
-.. code::
-
-   sudo yum install git
-
-Install java 1.7
-
-.. code::
-
-   sudo yum install java-1.7.0-openjdk-devel
-
-Install maven 2.5
-
-.. code::
-
-	sudo yum install wget
-	wget http://mirrors.gigenet.com/apache/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
-	su -c "tar -zxvf apache-maven-3.2.5-bin.tar.gz -C /usr/local"
-	cd /usr/local
-	sudo ln -s apache-maven-3.2.5 maven
-
-Add the following lines to the file /etc/profile.d/maven.sh
-
-.. code::
-
-	# Add the following lines to maven.sh
-	export M2_HOME=/usr/local/maven
-	export M2=$M2_HOME/bin
-	PATH=$M2:$PATH
-
-In order to check that your maven installation is OK, you shluld exit your current session with "exit" command, enter again
-and type
-
-.. code::
-
-	mvn -version
-
-if the system shows the current maven version installed in your host, you are ready to continue with this guide.
-
-Now we are ready to build the SDC rpm and finally install it
-
-The SDC is a maven application so, we should follow following instructions:
-
-- Download SDC code from github
-
-.. code::
-
-   git clone -b develop https://github.com/telefonicaid/fiware-puppetwrapper
-
-- Go to fiware-sdc folder and compile, launch test and build all modules
-
-.. code::
-	
-    cd fiware-puppetwrapper/
-    mvn clean install
-    
-It is a a maven application:
-
-Compile, launch test and build all modules
-
-.. code ::
-     
-     $ mvn assembly:assembly
-
-- for centOS (you need to have installed rpm-bluid. If not, please type "yum install rpm-build" )
-
-.. code::
-
-    mvn install -Prpm -DskipTests
-        (created target/rpm/paasmanager/RPMS/noarch/paasmanager-XXXX.noarch.rpm)
-
-Finally go to the folder where the rpm has been created (target/rpm/fiware-paas/RPMS/noarch) and execute
-
-.. code::
-
-	cd target/rpm/fiware-paas/RPMS/noarch
-	rpm -i <rpm-name>.rpm
-
-Configuring the PuppetWrapper as service 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Once we have installed and configured the puppetwapper, the next step is to configure it as a service.
-To do that just create a file in /etc/init.d/fiware-puppetwrapper with the following content
-
-.. code::
-
-    #!/bin/bash
-    # chkconfig: 2345 20 80
-    # description: Description comes here....
-    # Source function library.
-    . /etc/init.d/functions
-    start() {
-        /opt/fiware-puppetwrapper/bin/jetty.sh start
-    }
-    stop() {
-        /opt/fiware-puppetwrapper/bin/jetty.sh stop
-    }
-    case "$1" in 
-        start)
-            start
-        ;;
-        stop)
-            stop
-        ;;
-        restart)
-            stop
-            start
-        ;;
-        status)
-            /opt/fiware-puppetwrapper/bin/jetty.sh status
-        ;;
-        *)
-            echo "Usage: $0 {start|stop|status|restart}"
-    esac
-    exit 0 
-
-Now you need to execute:
-
-.. code::
-
-    chkconfig --add fiware-puppetwrapper
-    chkconfig fiware-puppetwrapper on
-    service fiware-puppetwrapper start
- 
- 
-PuppetWrapper Configuration instructions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-file puppetwrapper.properties contains all necessary parameters.
-
-.. code ::
-
-     #puppet path
-     defaultManifestsPath=/etc/puppet/manifests/
-     modulesCodeDownloadPath=/etc/puppet/modules/
-     #mongo connection
-     mongo.host=127.0.0.1
-     mongo.port=27017
-
-To allow puppetwrapper to execute add to /etc/sudoers:
-
-.. code ::
-     
-     tomcat ALL=(ALL) NOPASSWD: /usr/bin/puppet
-
-in this section
-
-.. code ::
-
-     ## Allows people in group wheel to run all commands
-     # %wheel ALL=(ALL) ALL
-     ## Same thing without a password
-     # %wheel ALL=(ALL) NOPASSWD: ALL
-
-comment out the following line
-
-.. code ::
-
-     #Defaults requiretty
-     PuppetWrapper API
-
+To install Puppet component, pleae refer to the following Puppet Installation Guide at 
+[https://github.com/telefonicaid/fiware-puppetwrapper/blob/develop/doc/installation-guide.rst]
 
 Requirements: Install PostgreSQL
 --------------------------------
@@ -1201,5 +780,48 @@ For obtaining the tables in the database, just use
       public | task                          | table | postgres
      
      (18 rows)
+
+PupperWrapper
+-------------
+
+This is the PuppetWrapper API
+
+PuppetWrapper API v2
+
+.. code::
+     
+     ##POST /puppetwrapper/v2/node/{nodeName}/install ##json payload: 
+     ##{"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
+
+and example of curl could be:
+
+.. code ::
+ 
+     
+.. code::
+     
+     ##POST /puppetwrapper/v2/node/{nodeName}/uninstall ##json payload: 
+     ##{"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
+
+.. code::
+
+     ##GET /puppetwrapper/v2/node/{nodeName}/generate ##will generate the following files in /etc/puppet/manifests 
+     ##add an import line to site.pp 
+     ##generate the corresponding .pp file as group/nodeName.pp 
+
+.. code::
+
+     ##POST /puppetwrapper/module/{moduleName}/download ##payload : json as: {"url":”value”, ”repoSource”:”value”} 
+     ##Value on repoSource can be: git /svn 
+     ##will download the source code from the given url under {moduleName} directory. 
+
+.. code::
+     
+     ##DELETE /puppetwrapper/v2/node/{nodeName} ##will delete the node: nodeName 
+
+.. code::
+     
+     ##DELETE /puppetwrapper/v2/module/{modulename} ##will delete the module: moduleName 
+
 
 
