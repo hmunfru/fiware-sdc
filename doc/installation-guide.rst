@@ -796,8 +796,17 @@ PuppetWrapper API v2
 and example of curl could be:
 
 .. code ::
- 
+
+     curl -v -k @payload.txt -H 'Content-Type: application xml' -H 'Accept: application/xml' -H 'X-Auth-Token: 5d035c3a29be41e0b7007383bdbbec57' -H 'Tenant-Id: 60b4125450fc4a109f50357894ba2e28' -X GET 'https://localhost:8443/puppetwrapper/v2/node/{nodeName}/install'
+
+where payload.txt includes:
+
+.. code ::
      
+     {"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
+
+Next, we show the PupperwrapperAPI v2:
+    
 .. code::
      
      ##POST /puppetwrapper/v2/node/{nodeName}/uninstall ##json payload: 
