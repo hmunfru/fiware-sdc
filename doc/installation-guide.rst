@@ -167,6 +167,7 @@ Firstly, it is required to install the PostgreSQL
 [http://wiki.postgresql.org/wiki/YUM_Installation\ ].
 
 .. code:: 
+
     yum install postgreql postgresql-server posgresql-cotrib
 
 
