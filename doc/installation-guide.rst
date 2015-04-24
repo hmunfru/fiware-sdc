@@ -18,7 +18,7 @@ the following software:
 -  open jdk 7
 -  PostgreSQL [http://www.postgresql.org/\ ]
 
-SDC should be installed in a host with 2Gb RAM.
+SDC should be installed in a host with at least 2Gb RAM.
 
 Installation  (for CentOS)
 ==========================
@@ -33,7 +33,7 @@ in /etc/yum.repos.d/fiware.repo, with the following content.
  
 	[Fiware]
 	name=FIWARE repository
-	baseurl=http://repositories.testbed.fi-ware.eu/repo/rpm/x86_64/
+	baseurl=http://repositories.testbed.fi-ware.org/repo/rpm/x86_64/
 	gpgcheck=0
 	enabled=1
     
@@ -98,7 +98,7 @@ Add the following lines to the file /etc/profile.d/maven.sh
 	export M2=$M2_HOME/bin
 	PATH=$M2:$PATH
 
-In order to check that your maven installation is OK, you shluld exit your current session with "exit" command, enter again
+In order to check that your maven installation is OK, you should exit your current session with "exit" command, enter again
 and type
 
 .. code::
@@ -109,7 +109,7 @@ if the system shows the current maven version installed in your host, you are re
 
 Now we are ready to build the SDC rpm and finally install it
 
-The SDC is a maven application so, we should follow following instructions:
+The SDC is a maven application so, we should follow the following instructions:
 
 - Download SDC code from github
 
@@ -230,7 +230,7 @@ the GUI. You can copy them in order to use them later.
 Chef server cookbook repository
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The FI-WARE cookbook repository is in FI-WARE SVN repository. To upload
+The FIWARE cookbook repository is in FIWARE SVN repository. To upload
 the recipes into the chef server you need:
 
 -  To dowload the svn repository (yum install svn if not installed):
@@ -261,7 +261,7 @@ chef-client
     curl -L https://www.opscode.com/chef/install.sh | sudo bash
 
 Before you configure the chef-client you should add the admin-pem and chef-validator.pem
-to the directory where chef-client finds its configuration (By default shoud be $HOME/.chef),
+to the directory where chef-client finds its configuration (By default should be $HOME/.chef),
 In this directory should be placed the admin.pem and chef-validator.pem files before you start
 with the chef-client configuration.
 
@@ -274,7 +274,7 @@ default
 
 The script will ask the following parameters:
 
-- Please enter the chef server URL: use the FQDN for the Chef server
+- Please enter the chef server URL: use the FQDN (type "hostname" to find out ) for the Chef server
 
 - A name for the new user: use "station1"
 
@@ -307,7 +307,7 @@ example:
 Puppet
 ~~~~~~
 
-To install Puppet component, pleae refer to the following Puppet Installation Guide at 
+To install Puppet component, please refer to the following Puppet Installation Guide at 
 [https://github.com/telefonicaid/fiware-puppetwrapper/blob/develop/doc/installation-guide.rst]
 
 Requirements: Install PostgreSQL
@@ -541,10 +541,10 @@ config.js in the keystone-proxy the following lines:
         "name": "chef-server"
     },
     {"endpoints": [
-        {"adminURL": "https://130.206.81.91:8443/puppetwrapper/"
+        {"adminURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
          "region": "myregion"
-         "internalURL": "https://130.206.81.91:8443/puppetwrapper/"
-         "publicURL": "https://130.206.81.91:8443/puppetwrapper/"
+         "internalURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
+         "publicURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
         }
         ],
         "endpoints_links": [],
@@ -552,10 +552,10 @@ config.js in the keystone-proxy the following lines:
         "name": "puppetwrapper"
     },
     {"endpoints": [
-        {"adminURL": "puppet-master.dev-havana.fi-ware.org"
+        {"adminURL": "puppet-master-url"
          "region": "myregion"
-         "internalURL": "puppet-master.dev-havana.fi-ware.org"
-         "publicURL": "puppet-master.dev-havana.fi-ware.org"
+         "internalURL": "puppet-master-url"
+         "publicURL": "puppet-master-url"
         }
         ],
         "endpoints_links": [],
@@ -620,12 +620,12 @@ Quickest solution: using a self-signed certificate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The service works "out of the box" against passive attacks (e.g. a sniffer) because a self-signed certificated is 
-generated automatically when the RPM is installed. Any certificate includes a special field call "CN" (Common name) 
-with the identity of the host: the generated certificate uses as identity the IP of the host.
+generated automatically when the RPM is installed. Any certificate includes a special field call "CN" (Common Name) 
+with the identity of the host: the generated certificate uses the host IP as identity .
 
-The IP used in the certificate should be the public IP (i.e. the floating IP). The script which generates the 
-certificate knows the public IP asking to an Internet service (http://ifconfig.me/ip). Usually this obtains the 
-floating IP of the server, but of course it wont work without a direct connection to Internet.
+The IP used in the certificate should be the public IP (i.e. the floating IP). The script, which generates the 
+certificate, knows the public IP asking to an Internet service (http://ifconfig.me/ip). Usually this obtains the 
+floating IP of the server, but of course it will not work without a direct connection to Internet.
 
 If you need to regenerate a self-signed certificate with a different IP address (or better, a convenient configured 
 hostname), please run:
@@ -634,7 +634,7 @@ hostname), please run:
 
     /opt/fiware-sdc/bin/generateselfsigned.sh myhost.mydomain.org
 
-By the way, the self-signed certificate is at /etc/keystorejetty. This file wont be overwritten although you reinstall 
+By the way, the self-signed certificate is at /etc/keystorejetty. This file will not be overwritten although you reinstall 
 the package. The same way, it wont be removed automatically if you uninstall de package.
 
 Advanced solution: using certificates signed by a CA
@@ -656,7 +656,7 @@ This solution implies:
 
 * The file /etc/keystorejetty must be replaced with another one generated from the wildcard certificate, the corresponding private key and other certificates signing the wild certificate.
 
-It's possible that you already have a wild certificate securing your portal, but Apache server uses a different file format. 
+It is possible that you already have a wild certificate securing your portal, but Apache server uses a different file format. 
 A tool is provided to import a wildcard certificate, a private key and a chain of certificates, into /etc/keystorejetty:
 
 .. code::
@@ -745,7 +745,8 @@ and the following output for the jetty process:
 
 Databases
 ---------
-The last step in the sanity check, once that we have identified the processes and ports is to check the different databases that have to be up and accept queries. Fort he first one, if we execute the following commands:
+The last step in the sanity check, once that we have identified the processes and ports is to check the different 
+databases that have to be up and accept queries. For he first one, if we execute the following commands:
 
 .. code::
 
