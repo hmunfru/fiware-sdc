@@ -136,7 +136,6 @@ keystone_passwd=
 tenant_id=
 public_ip=`curl -s checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//'`
 sdc_manager_url="https://$public_ip:8443/sdc/rest"
-user_data_path="/opt/fiware-sdc/resources/userdata"
 
 echo -n "Enter Keystone url > "
 read keystone_url
@@ -151,13 +150,11 @@ echo "keystone_url:$keystone_url"
 echo "keystone_user:$keystone_user"
 echo "keystone_passwd:$keystone_passwd"
 echo "tenant_id:$tenant_id"
-echo "user_data_path:$user_data_path"
 echo "sdc_manager_url:$sdc_manager_url"
 
 
 sudo -u postgres sh << EOF1
 psql -U postgres -d $db_name << EOF
-UPDATE configuration_properties SET value='$user_data_path' where key='user_data_path';
 UPDATE configuration_properties SET value='$sdc_manager_url' where key='sdc_manager_url';
 UPDATE configuration_properties SET value='$keystone_url' where key='openstack-tcloud.keystone.url';
 UPDATE configuration_properties SET value='$keystone_user' where key='openstack-tcloud.keystone.user';
