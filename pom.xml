@@ -416,6 +416,23 @@
                                         </source>
                                     </sources>
                                 </mapping>
+                                <mapping>
+                                    <directory>/opt/fiware-sdc/resources</directory>
+
+                                    <configuration>true</configuration>
+                                    <sources>
+                                        <source>
+                                            <location>
+                                                ${project.build.directory}/sdc-server-dist/resources/db-initial.sql
+                                            </location>
+                                        </source>
+                                        <source>
+                                            <location>
+                                                ${project.build.directory}/sdc-server-dist/resources/db-changelog.sql
+                                            </location>
+                                        </source>
+                                    </sources>
+                                </mapping>
                             </mappings>
                             <preinstallScriptlet>
                                 <script>
