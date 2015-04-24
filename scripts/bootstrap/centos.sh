@@ -33,23 +33,25 @@ gpgcheck=0
 enabled=1
 EOM
 
-yum install -y fiware-paas
+yum install -y fiware-sdc
 
 echo "Configuring Postgres"
 
 db_name=
-echo -n "Enter PaasManager Database name [paasmanager] > "
+postgres_user_passwd=
+echo -n "Enter SDC Database name [sdc] > "
 read db_name
+echo -n "Enter Postgres user password [postgres_passwd] > "
+read postgres_user_passwd
 
-echo "PaasManager Database name:$db_name"
+echo "SDC Database name:$db_name"
 
 sudo -u postgres sh << EOF1
-dbname="postgres"
 username="postgres"
 psql $dbname $username << EOF
-alter user postgres with password 'postgres';
+alter user postgres with password '$postgres_user_passwd';
 create database $db_name;
-grant all privileges on database paasmanager to postgres;
+grant all privileges on database $db_name to postgres;
 \q
 EOF
 EOF1
@@ -62,11 +64,11 @@ echo "Modifying postgresql.conf"
 postgresql_file=`find / -name postgresql.conf`
 sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '0.0.0.0'/g" $postgresql_file
 
-echo "Reloading Paas Manager Database"
+echo "Reloading SDCr Database"
 service postgresql reload
 
 sudo -u postgres sh << EOF1
-cd /opt/fiware-paas/resources
+cd /opt/fiware-sdc/resources
 psql -U postgres -d $db_name << EOF
 \i db-initial.sql
 \i db-changelog.sql
@@ -75,29 +77,29 @@ EOF
 EOF1
 
 
-echo "Configuring Paas Manager"
-echo "Modifying paasmanager.xml"
-paasmanager_xml_file="/opt/fiware-paas/webapps/paasmanager.xml"
-sed -i "s/>user</>postgres</g" $paasmanager_xml_file
-sed -i "s/>paas</>postgres</g" $paasmanager_xml_file
-sed -i "s/>name</>$db_name</g" $paasmanager_xml_file
-sed -i "s/>host</>localhost</g" $paasmanager_xml_file
+echo "Configuring SDC"
+echo "Modifying sdc.xml"
+sdc_xml_file="/opt/fiware-sdc/webapps/sdc.xml"
+sed -i "s/User\">postgres</User\">postgres</g" $sdc_xml_file
+sed -i "s/Password\">postgres</Password\">$postgres_user_passwd</g" $sdc_xml_file
+sed -i "s/DatabaseName\">sdc_int_cookbooks/DatabaseName\">$db_name/g" $sdc_xml_file
+sed -i "s/ServerName\">130.206.80.119</ServerName\">localhost</g" $sdc_xml_file
 
 
-echo "PaasManager being a service"
-PAASMANAGER_SERVICEFILE="/etc/init.d/fiware-paas"
+echo "SDC being a service"
+SDC_SERVICEFILE="/etc/init.d/fiware-sdc"
 
-/bin/cat <<EOM >$PAASMANAGER_SERVICEFILE
+/bin/cat <<EOM >$SDC_SERVICEFILE
 #!/bin/bash
     # chkconfig: 2345 20 80
     # description: Description comes here....
     # Source function library.
     . /etc/init.d/functions
     start() {
-        /opt/fiware-paas/bin/jetty.sh start
+        /opt/fiware-sdc/bin/jetty.sh start
     }
     stop() {
-        /opt/fiware-paas/bin/jetty.sh stop
+        /opt/fiware-sdc/bin/jetty.sh stop
     }
     case "\$1" in 
         start)
@@ -111,7 +113,7 @@ PAASMANAGER_SERVICEFILE="/etc/init.d/fiware-paas"
             start
         ;;
         status)
-            /opt/fiware-paas/bin/jetty.sh status
+            /opt/fiware-sdc/bin/jetty.sh status
         ;;
         *)
             echo "Usage: $0 {start|stop|status|restart}"
@@ -119,22 +121,22 @@ PAASMANAGER_SERVICEFILE="/etc/init.d/fiware-paas"
     exit 0
 EOM
 
-chmod 777 $PAASMANAGER_SERVICEFILE
+chmod 777 $SDC_SERVICEFILE
 
-echo "Starting PaasManager as a Service"
+echo "Starting SDC as a Service"
 
-chkconfig --add fiware-paas
-chkconfig fiware-paas on
-service fiware-paas start
+chkconfig --add fiware-sdc
+chkconfig fiware-sdc on
+service fiware-sdc start
 
-echo "Configuring PaasManager"
+echo "Configuring SDC"
 keystone_url=
 keystone_user=
 keystone_passwd=
 tenant_id=
 public_ip=`curl -s checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//'`
-paas_manager_url="https://$public_ip:8443/paasmanager/rest"
-user_data_path="/opt/fiware-paas/resources/userdata"
+sdc_manager_url="https://$public_ip:8443/sdc/rest"
+user_data_path="/opt/fiware-sdc/resources/userdata"
 
 echo -n "Enter Keystone url > "
 read keystone_url
@@ -150,13 +152,13 @@ echo "keystone_user:$keystone_user"
 echo "keystone_passwd:$keystone_passwd"
 echo "tenant_id:$tenant_id"
 echo "user_data_path:$user_data_path"
-echo "paas_manager_url:$paas_manager_url"
+echo "sdc_manager_url:$sdc_manager_url"
 
 
 sudo -u postgres sh << EOF1
 psql -U postgres -d $db_name << EOF
 UPDATE configuration_properties SET value='$user_data_path' where key='user_data_path';
-UPDATE configuration_properties SET value='$paas_manager_url' where key='paas_manager_url';
+UPDATE configuration_properties SET value='$sdc_manager_url' where key='sdc_manager_url';
 UPDATE configuration_properties SET value='$keystone_url' where key='openstack-tcloud.keystone.url';
 UPDATE configuration_properties SET value='$keystone_user' where key='openstack-tcloud.keystone.user';
 UPDATE configuration_properties SET value='$keystone_passwd' where key='openstack-tcloud.keystone.pass';
