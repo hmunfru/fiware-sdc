@@ -519,10 +519,10 @@ config.js in the keystone-proxy the following lines:
 .. code::
 
      {"endpoints": [
-        {"adminURL": "http://sdc-ip:8080/sdc/rest",
+        {"adminURL": "sdc-base-url",
         "region": "myregion",
-        "internalURL": "http://sdc-ip:8080/sdc/rest",
-        "publicURL": "http://sdc-ip:8080/sdc/rest"
+        "internalURL": "sdc-base-url",
+        "publicURL": "sdc-base-url"
         }
         ],
         "endpoints_links": [],
@@ -530,10 +530,10 @@ config.js in the keystone-proxy the following lines:
         "name": "sdc"
     },
     {"endpoints": [
-        {"adminURL": "https://chef-server-ip",
+        {"adminURL": "chef-server-url",
         "region": "myregion",
-        "internalURL": "https://chef-server-ip",
-        "publicURL": "https://chef-server-ip"
+        "internalURL": "chef-server-url",
+        "publicURL": "chef-server-url"
         }
         ],
         "endpoints_links": [],
@@ -541,10 +541,10 @@ config.js in the keystone-proxy the following lines:
         "name": "chef-server"
     },
     {"endpoints": [
-        {"adminURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
+        {"adminURL": "puppet-wrapper-url"
          "region": "myregion"
-         "internalURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
-         "publicURL": "https://puppetwrapper-ip:8443/puppetwrapper/"
+         "internalURL": "puppet-wrapper-url"
+         "publicURL": "puppet-wrapper-url"
         }
         ],
         "endpoints_links": [],
@@ -563,7 +563,16 @@ config.js in the keystone-proxy the following lines:
         "name": "puppetmaster"
     },
 
-where myregion should be the name of the openstack region defined.
+where myregion should be the name of the openstack region defined and puppet-wrapper-url, chef-server-url, sdc-base-url are typically
+urls of the form:
+
+.. code ::
+     
+     puppet-wrapper-url = https://puppetwrapper-ip:port/puppetwrapper/
+     sdc-base-url = https://sdc-ip:port/sdc/rest
+     chef-server-url = http://chef-server-ip:port
+     
+     
 
 Creating images sdc-aware
 -------------------------
