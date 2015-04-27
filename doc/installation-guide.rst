@@ -260,7 +260,7 @@ chef-client
 
     curl -L https://www.opscode.com/chef/install.sh | sudo bash
 
-Before you configure the chef-client you should add the admin-pem and chef-validator.pem
+Before you configure the chef-client you should add the admin.pem and chef-validator.pem
 to the directory where chef-client finds its configuration (By default should be $HOME/.chef),
 In this directory should be placed the admin.pem and chef-validator.pem files before you start
 with the chef-client configuration.
