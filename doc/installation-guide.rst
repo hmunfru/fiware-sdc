@@ -168,7 +168,7 @@ Firstly, it is required to install the PostgreSQL
 
 .. code:: 
 
-    yum install postgreql postgresql-server posgresql-cotrib
+    yum install postgreql postgresql-server posgresql-contrib
 
 
 Start Postgresql
