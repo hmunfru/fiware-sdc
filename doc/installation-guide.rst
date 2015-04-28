@@ -20,8 +20,50 @@ the following software:
 
 SDC should be installed in a host with at least 2Gb RAM.
 
-Installation  (for CentOS)
-==========================
+Installation from script (for CentOS)
+=====================================
+
+The installation of fiware-sdc can be done in the easiest way by executing the script
+
+.. code ::
+
+     scripts/bootstrap/centos.sh
+
+that is in the github repository of the project.
+
+In order to perform the installation via script, git should be installed (yum install git). 
+Just clone the github repository:
+
+.. code ::
+
+     git clone https://github.com/telefonicaid/fiware-sdc
+
+and go to the folder
+
+.. code ::
+
+     cd fiware-sdc/scripts/bootstrap
+
+Assign the corresponding permissions to the script centos.sh and execute under root user
+
+.. code ::
+
+     ./centos.sh
+     
+The script will ask you the following data:
+- The database name for the fiware-sdc
+- The postgres password of the database
+- the keytone url to connect fiware-sdc for the authentication process
+- the admin keystone user for the authentication process
+- the admin password for the authentication process
+
+Once the script is finished, you will have fiware-sdc installed under /opt/fiware-sdc/ . Please go to the Sanity Check
+section in order to test the installation. This script does not insert the fiware-sdc data into the keystone, so this
+action has to be done manually. In order to complete the installation please refer to Register SDC application into 
+keystone section.
+
+Manual Installation  (for CentOS)
+=================================
 
 Install SDC from RPM
 --------------------
