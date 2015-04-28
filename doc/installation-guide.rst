@@ -837,56 +837,5 @@ For obtaining the tables in the database, just use
      
      (18 rows)
 
-PupperWrapper
--------------
-
-This is the PuppetWrapper API
-
-PuppetWrapper API v2
-
-.. code::
-     
-     ##POST /puppetwrapper/v2/node/{nodeName}/install ##json payload: 
-     ##{"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
-
-and example of curl could be:
-
-.. code ::
-
-     curl -v -k @payload.txt -H 'Content-Type: application xml' -H 'Accept: application/xml' -H 'X-Auth-Token: 5d035c3a29be41e0b7007383bdbbec57' -H 'Tenant-Id: 60b4125450fc4a109f50357894ba2e28' -X GET 'https://localhost:8443/puppetwrapper/v2/node/{nodeName}/install'
-
-where payload.txt includes:
-
-.. code ::
-     
-     {"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
-
-Next, we show the PupperwrapperAPI v2:
-    
-.. code::
-     
-     ##POST /puppetwrapper/v2/node/{nodeName}/uninstall ##json payload: 
-     ##{"attributes":[{"value":"valor","key":"clave","id":23119,"description":null}],"version":"0.1","group":"alberts","softwareName":"testPuppet"} 
-
-.. code::
-
-     ##GET /puppetwrapper/v2/node/{nodeName}/generate ##will generate the following files in /etc/puppet/manifests 
-     ##add an import line to site.pp 
-     ##generate the corresponding .pp file as group/nodeName.pp 
-
-.. code::
-
-     ##POST /puppetwrapper/module/{moduleName}/download ##payload : json as: {"url":”value”, ”repoSource”:”value”} 
-     ##Value on repoSource can be: git /svn 
-     ##will download the source code from the given url under {moduleName} directory. 
-
-.. code::
-     
-     ##DELETE /puppetwrapper/v2/node/{nodeName} ##will delete the node: nodeName 
-
-.. code::
-     
-     ##DELETE /puppetwrapper/v2/module/{modulename} ##will delete the module: moduleName 
-
 
 
