@@ -20,8 +20,8 @@ the following software:
 
 SDC should be installed in a host with at least 2Gb RAM.
 
-Installation from script (for CentOS)
-=====================================
+Installation via script (for CentOS)
+====================================
 
 The installation of fiware-sdc can be done in the easiest way by executing the script
 
@@ -51,6 +51,7 @@ Assign the corresponding permissions to the script centos.sh and execute under r
      ./centos.sh
      
 The script will ask you the following data:
+
 - The database name for the fiware-sdc
 - The postgres password of the database
 - the keytone url to connect fiware-sdc for the authentication process
@@ -85,14 +86,17 @@ After that, you can install the SDC just doing:
 
 	yum install fiware-sdc
 
-or specifying the version
+and the latest version will be installed. In order to install a specific version
+
 
 .. code::
 
 	yum install fiware-sdc-{version}-1.noarch
 
-to install a specific SDC version where {version} could be "2.6.0"
+where {version} being the specific version to be installed
 
+The SDC installation via script does not include either Chef server installation nor the Puppet Installation. 
+To perform these installation please refer to the corresponding sections included in this guide.
 
 Install SDC from source
 -----------------------
