@@ -471,4 +471,16 @@ public class ProductResourceValidatorImplTest extends ValidatorUtils {
 
         verify(systemPropertiesProvider, times(1)).getProperty(SystemPropertiesProvider.AVAILABLE_ATTRIBUTE_TYPES);
     }
+    @Test(expected = InvalidEntityException.class)
+    public void testValidateMetadataDuplicated() throws Exception {
+        String name = "t";
+        product.setName(name);
+        Metadata meta1 = new Metadata("public", "novalid");
+        Metadata meta2 = new Metadata("private", "novalid");
+        Metadata meta3 = new Metadata("public", "novalid");
+        product.addMetadata(meta1);
+        product.addMetadata(meta2);
+        product.addMetadata(meta3);
+        productResourceValidator.validateInsert(product);
+    }
 }

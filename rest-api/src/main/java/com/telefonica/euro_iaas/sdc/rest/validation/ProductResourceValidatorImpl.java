@@ -188,7 +188,12 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
     }
 
     private void validateMetadata(List<Metadata> metadatas) throws InvalidProductException {
-        for (int i = 0; i < metadatas.size(); i++) {
+    	if (areMetadataDuplicated(metadatas)) {
+            String msg = "There are some metadatas duplicated in the product payload";
+            throw new InvalidProductException(msg);
+        }
+    	
+    	for (int i = 0; i < metadatas.size(); i++) {
             Metadata metadata = metadatas.get(i);
 
             if (metadata.getKey().equals("open_ports") ||
@@ -266,6 +271,20 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
 
     }
 
+    private boolean areMetadataDuplicated (List<Metadata> metadatas) {
+    	List <Metadata> support_metadatas = new ArrayList<Metadata>();
+    	
+    	for (int i=0; i < metadatas.size(); i++) {
+    		Metadata metadata = metadatas.get(i);
+    		
+    		for (int j=0; j < support_metadatas.size(); j++) {
+    			if (metadata.getKey().equals(support_metadatas.get(j).getKey()))
+    				return true;
+    		}
+    		support_metadatas.add(metadata);  		
+    	}
+    	return false;
+    }
     /**
      * @param generalValidator
      *            the generalValidator to set
