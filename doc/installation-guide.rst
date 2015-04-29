@@ -54,7 +54,7 @@ The script will ask you the following data:
 
 - The database name for the fiware-sdc
 - The postgres password of the database
-- the keytone url to connect fiware-sdc for the authentication process
+- the keystone url to connect fiware-sdc for the authentication process
 - the admin keystone user for the authentication process
 - the admin password for the authentication process
 
@@ -62,6 +62,9 @@ Once the script is finished, you will have fiware-sdc installed under /opt/fiwar
 section in order to test the installation. This script does not insert the fiware-sdc data into the keystone, so this
 action has to be done manually. In order to complete the installation please refer to Register SDC application into 
 keystone section.
+
+The SDC installation via script does not include either Chef server installation nor the Puppet installation. 
+To perform these installations please refer to the corresponding sections included in this guide.
 
 Manual Installation  (for CentOS)
 =================================
@@ -94,9 +97,6 @@ and the latest version will be installed. In order to install a specific version
 	yum install fiware-sdc-{version}-1.noarch
 
 where {version} being the specific version to be installed
-
-The SDC installation via script does not include either Chef server installation nor the Puppet Installation. 
-To perform these installation please refer to the corresponding sections included in this guide.
 
 Install SDC from source
 -----------------------
@@ -155,13 +155,13 @@ if the system shows the current maven version installed in your host, you are re
 
 Now we are ready to build the SDC rpm and finally install it
 
-The SDC is a maven application so, we should follow the following instructions:
+The SDC is a maven application so, we should continue with the following instructions:
 
 - Download SDC code from github
 
 .. code::
 
-   git clone -b develop https://github.com/telefonicaid/fiware-sdc
+   git clone https://github.com/telefonicaid/fiware-sdc
 
 - Go to fiware-sdc folder and compile, launch test and build all modules
 
@@ -194,16 +194,17 @@ for centOS (you need to have installed rpm-bluid. If not, please type "yum insta
 .. code::
 
    		$ mvn package -P rpm -DskipTests
-   		(created target/rpm/sdc/RPMS/noarch/fiware-sdc-XXXX.noarch.rpm)
+   		(created ./target/rpm/sdc/RPMS/noarch/fiware-sdc-XXXX.noarch.rpm)
 
-Finally go to the folder where the rpm has been created (target/rpm/sdc/RPMS/noarch) and execute
+Finally go to the folder where the rpm has been created (./target/rpm/sdc/RPMS/noarch) and execute
 
 .. code::
 
 	cd target/rpm/fiware-sdc/RPMS/noarch
 	rpm -i <rpm-name>.rpm
 
-Please, be aware  that the supported installation method is the RPM package. If you use other method, some extra steps may be required. For example you would need to generate manually the certificate (See the section about "Configuring the HTTPS certificate" for more information):
+Please, be aware  that the supported installation method is the RPM package. If you use other method, some extra steps may be required. 
+For example, you would need to generate manually the certificate (see the section about "Configuring the HTTPS certificate" for more details):
 
 .. code::
 
@@ -218,12 +219,12 @@ Chef server
 Chef server Installation (Centos 6.5)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The installation of the chef-server involves to install the chef-server
+The SDC installation involves also to install the chef-server
 package, which can be obtained in [http://www.getchef.com/chef/install/\ ]. If you find any problem in the chef-server
 installation process, please refer to the chef-serve official site. This small guide has been tested on Centos6.5
 
-Go to this url and select the chef-server version you are interested in depending also on you operating system.
-Copy the url to download the chef-server selected version and type
+Go to this url and select the chef-server version you are interested in, depending also on your own operating system.
+Copy the url to download the selected chef-server version and type
 
 .. code::
 
@@ -235,16 +236,15 @@ in this example we have
 
 	chef-server-url = https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-server-11.1.6-1.el6.x86_64.rpm
 
-In case you do not have wget installed on your syste, please type yum install wget to install it. We can just execute
+In case you do not have wget installed on your system, please type 'yum install wget' to install it. We can just execute
 
 .. code::
 
     mv chef-server-11.1.6-1.el6.x86_64.rpm chef-server-package.rpm
     rpm -Uvh chef-server-package.rpm
 
-Verify the the hostname for the Chef server by running the hostname
-command. The hostname for the Chef server must be a FQDN. This means
-hostaname.domainame. In case it is not configure, you can do it
+Verify the the hostname for the Chef server by running the 'hostname'command. The hostname for the Chef server must 
+be a FQDN. This means hostaname.domainame. In case it is not configure, you can do it
 
 .. code::
 
@@ -279,7 +279,7 @@ Chef server cookbook repository
 The FIWARE cookbook repository is in FIWARE SVN repository. To upload
 the recipes into the chef server you need:
 
--  To dowload the svn repository (yum install svn if not installed):
+-  To dowload the svn repository ('yum install svn' if not installed):
 
 .. code::
 
@@ -308,8 +308,8 @@ chef-client
 
 Before you configure the chef-client you should add the admin.pem and chef-validator.pem
 to the directory where chef-client finds its configuration (By default should be $HOME/.chef),
-In this directory should be placed the admin.pem and chef-validator.pem files before you start
-with the chef-client configuration.
+the admin.pem and chef-validator.pem files should be placed in this directory before starting 
+the chef-client configuration.
 
 To configure chef-client, type the following command. You can accept all the
 default
@@ -337,10 +337,9 @@ The script will ask the following parameters:
 -  password for the new user: type the password you have in mind
 
 It is possible that the first time you got an error due to the autosigned-certificate of the chef-server. If this is
-the case, pleawe follow the instructions you have in the screen and type knife ssl fetch to accept this certificate.
+the case, please follow the instructions you have in the screen and type 'knife ssl fetch' to accept this certificate.
 
-Once you have a client configured, you can run the CLI. Just one
-example:
+Once you have a configured client, you can run the CLI. Just one:
 
 .. code::
 
@@ -360,7 +359,7 @@ Requirements: Install PostgreSQL
 --------------------------------
 
 The SDC node needs to have PostgreSQL installed in service mode and a
-database created called SDC. For CentOS, these are the instructions:
+database called SDC. For CentOS, these are the instructions:
 
 Firstly, it is required to install the PostgreSQL
 [http://wiki.postgresql.org/wiki/YUM_Installation\ ].
@@ -391,7 +390,7 @@ Then, you need to configure postgresql to allow for accessing. In
     listen_addresses = '0.0.0.0'
 
 We need to create the sdc database. To do that we need to connect as postgres user to the PostgreSQL
-server and set the password for user postgres using alter user as below:
+server and set the password for user 'postgres' using alter user as below:
 
 .. code::
 
@@ -399,12 +398,14 @@ server and set the password for user postgres using alter user as below:
     postgres$ psql postgres postgres;
     psql (8.4.13)
     Type "help" for help.
-    postgres=# alter user postgres with password 'postgres';
+    postgres=# alter user postgres with password '<postgres-password>';
     postgres=# create database sdc;
     postgres=# grant all privileges on database sdc to postgres;
     postgres=#\q
     exit
-    
+
+where <postgres-password> is the passowrd for postgres user.
+   
 In /var/lib/pgsql/data/pg\_hba.conf, change the table at the end of the file to
 look like:
 
@@ -479,7 +480,7 @@ See the snipet bellow to know how it works:
 Configuring the SDC as service 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once we have installed and configured the paas manager, the next step is to configure it as a service. To do that just create a file in 
+Once we have installed and configured the SDC, the next step is to configure it as a service. To do that just create a file in 
 /etc/init.d/fiware-sdc with the following content
 
 .. code::
@@ -528,7 +529,7 @@ The configuration of SDC is in configuration\_properties table. There,
 it is required to configure:
 
 -  openstack-tcloud.keystone.url: This is the url where the keystone-proxy is deployed
--  openstack-tcloud.keystone.user: the admmin user
+-  openstack-tcloud.keystone.user: the admin user
 -  openstack-tcloud.keystone.password: the admin password
 -  openstack-tcloud.keystone.tenant: the admin tenant
 -  sdc\_manager\_url: the final url, mainly http://sdc-ip:8080/sdc
@@ -690,7 +691,7 @@ hostname), please run:
     /opt/fiware-sdc/bin/generateselfsigned.sh myhost.mydomain.org
 
 By the way, the self-signed certificate is at /etc/keystorejetty. This file will not be overwritten although you reinstall 
-the package. The same way, it wont be removed automatically if you uninstall de package.
+the package. The same way, it will not be removed automatically if you uninstall the package.
 
 Advanced solution: using certificates signed by a CA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -722,10 +723,10 @@ A tool is provided to import a wildcard certificate, a private key and a chain o
 If you have a different configuration, for example your organization has got its own PKI, please refer 
 to: http://docs.codehaus.org/display/JETTY/How%2bto%2bconfigure%2bSSL
 
-Sanity check procedures
+Sanity Check procedures
 =======================
 
-Sanity check procedures
+Sanity Check procedures
 -----------------------
 The Sanity Check Procedures are the steps that a System Administrator will take to verify that an installation is ready to be tested. This is therefore a preliminary set of tests to ensure that obvious or basic malfunctioning is fixed before proceeding to unit tests, integration tests and user validation.
 
@@ -778,7 +779,7 @@ Taking into account the results of the ps commands in the previous section, we t
 
     netstat -p -a | grep $PID
 
-Where $PID is the PID of Java process obtained at the ps command described before, in the previous case 2396 jetty and 2859 (postgresql). 
+Where $PID is the PID of Java process obtained at the ps command described before, in the previous case 2396 (jetty) and 2859 (postgresql). 
 The expected results for the postgres process must be something like this output:
 
 .. code::
