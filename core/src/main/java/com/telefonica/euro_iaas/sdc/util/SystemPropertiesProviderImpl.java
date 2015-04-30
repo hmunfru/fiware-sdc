@@ -26,7 +26,7 @@ package com.telefonica.euro_iaas.sdc.util;
 
 import java.util.Properties;
 
-import com.telefonica.euro_iaas.commons.properties.PropertiesProvider;
+import com.telefonica.fiware.commons.properties.PropertiesProvider;
 
 /**
  * Get the properties from the default file or from.

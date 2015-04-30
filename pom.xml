@@ -95,8 +95,7 @@
 
         <!-- sonar -->
         <!-- exclusions must be synchronized with cobertura-maven-plugin exclusions -->
-        <sonar.exclusions>com/telefonica/**/data/**/*, org/w3/**/*,
-                        org/openstack/**/*,com/telefonica/**/dto/**/*</sonar.exclusions>
+        <sonar.exclusions>com/telefonica/**/data/**/*,com/telefonica/**/dto/**/*</sonar.exclusions>
         <sonar.dynamic>reuseReports</sonar.dynamic>
 
     </properties>
@@ -185,12 +184,7 @@
             <dependency>
                 <groupId>com.telefonica.iot</groupId>
                 <artifactId>commons</artifactId>
-                <version>2.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.telefonica.euro_iaas</groupId>
-                <artifactId>commons-properties</artifactId>
-                <version>1.1.2</version>
+                <version>2.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -243,16 +237,11 @@
                     <!-- aggregated reports for multi-module projects -->
                     <aggregate>true</aggregate>
                     <instrumentation>
-                        <ignores>
-                            <ignore>org.openstack.docs.common.api.v1.*</ignore>
-                        </ignores>
                         <excludes>
                             <exclude>com/telefonica/**/exception/**/*</exclude>
                             <exclude>com/telefonica/**/bootstrap/*</exclude>
                             <exclude>com/telefonica/**/model/**/*</exclude>
                             <exclude>com/telefonica/**/aspects/**/*</exclude>
-                            <exclude>org/w3/**/*</exclude>
-                            <exclude>org/openstack/**/*</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>
