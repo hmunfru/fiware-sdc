@@ -81,7 +81,7 @@ public class InstallatorPuppetImpl implements Installator {
     private OpenStackRegion openStackRegion;
 
     public static int REGISTRATION_MAX_TIME = 900000;
-    public static int INSTALLATION_MAX_TIME = 360000;
+    public static int INSTALLATION_MAX_TIME = 1200000;
     
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
