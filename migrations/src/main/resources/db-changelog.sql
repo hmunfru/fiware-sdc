@@ -138,3 +138,7 @@ ALTER TABLE product_attribute DROP COLUMN metadata_id;
 ALTER TABLE attribute ADD COLUMN type character varying(255) NULL;
 UPDATE attribute SET type='Plain' WHERE 1=1;
 ALTER TABLE attribute ALTER COLUMN type SET NOT NULL;
+
+--changeset jmms392:1-42
+INSERT INTO configuration_properties (key, namespace, value)VALUES ('registration.timeout','/SystemConfiguration.properties', '900000');
+INSERT INTO configuration_properties (key, namespace, value)VALUES ('installation.timeout','/SystemConfiguration.properties', '1200000');
