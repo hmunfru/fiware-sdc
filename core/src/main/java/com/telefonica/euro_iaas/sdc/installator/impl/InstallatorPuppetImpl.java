@@ -80,8 +80,9 @@ public class InstallatorPuppetImpl implements Installator {
 
     private OpenStackRegion openStackRegion;
 
-    public static int MAX_TIME = 360000;
-
+    public static int REGISTRATION_MAX_TIME = 900000;
+    public static int INSTALLATION_MAX_TIME = 360000;
+    
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
         try {
@@ -272,9 +273,9 @@ public class InstallatorPuppetImpl implements Installator {
         int time = 5000;
         int incremental_time = 10000;
         while (!isExecuted) {
-            log.info("MAX_TIME: " + MAX_TIME + " and time: " + time);
+            log.info("INSTALLATION_MAX_TIME: " + INSTALLATION_MAX_TIME + " and time: " + time);
             try {
-                if (time > MAX_TIME) {
+                if (time > INSTALLATION_MAX_TIME) {
                     String errorMesg = "Module " + module + " could not be executed in " + vm.getHostname();
                     log.info(errorMesg);
                     // unassignRecipes(vm, recipe, token);
@@ -357,7 +358,7 @@ public class InstallatorPuppetImpl implements Installator {
 
             try {
                 log.info("Checking node : " + hostname + " time:" + time);
-                if (time > MAX_TIME) {
+                if (time > REGISTRATION_MAX_TIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in puppet master";
                     log.info(errorMesg);
                     throw new CanNotCallPuppetException(errorMesg);
