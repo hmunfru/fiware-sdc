@@ -250,11 +250,14 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         String response = "RESPONSE";
         int time = 5000;
         int checkTime = 10000;
+        int REGISTRATION_MAXTIME = Integer.parseInt(propertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME));
+        
         while (!response.contains(hostname)) {
 
             try {
                 log.info("Checking node : " + hostname + " MAX_TIME: " + MAX_TIME + " time:" + time);
-                if (time > MAX_TIME) {
+                if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in ChefServer";
                     log.info(errorMesg);
                     throw new CanNotCallChefException(errorMesg);

@@ -47,11 +47,14 @@ import com.telefonica.euro_iaas.sdc.model.dto.ChefNode;
 import com.telefonica.euro_iaas.sdc.model.dto.VM;
 import com.telefonica.euro_iaas.sdc.util.IpToVM;
 import com.telefonica.fiware.commons.dao.EntityNotFoundException;
+import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
 
 public class InstallatorChefImpl extends BaseInstallableInstanceManagerChef implements Installator {
 
     private IpToVM ip2vm;
     private static Logger log = LoggerFactory.getLogger(InstallatorChefImpl.class);
+    
+    private SystemPropertiesProvider systemPropertiesProvider;
 
     /*
      * (non-Javadoc)
@@ -202,10 +205,13 @@ public class InstallatorChefImpl extends BaseInstallableInstanceManagerChef impl
         int time = 5000;
         int checkTime = 10000;
         Date fechaAhora = new Date();
+        int INSTALLATION_MAXTIME = Integer.parseInt(systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME));
+        
         while (!isExecuted) {
-            log.info("MAX_TIME: " + MAX_TIME + " and time: " + time);
+            log.info("INSTALLATION_MAXTIME: " + INSTALLATION_MAXTIME + " and time: " + time);
             try {
-                if (time > MAX_TIME) {
+                if (time > INSTALLATION_MAXTIME) {
                     String errorMesg = "Recipe " + process + " coub not be executed in " + vm.getChefClientName();
                     log.info(errorMesg);
                     // unassignRecipes(vm, recipe, token);
@@ -299,6 +305,15 @@ public class InstallatorChefImpl extends BaseInstallableInstanceManagerChef impl
      */
     public void setIp2vm(IpToVM ip2vm) {
         this.ip2vm = ip2vm;
+    }
+    
+    /**
+     * Gets the system properties provider.
+     * 
+     * @return the systemPropertiesProvider
+     */
+    public final SystemPropertiesProvider getSystemPropertiesProvider() {
+        return systemPropertiesProvider;
     }
 
 }
