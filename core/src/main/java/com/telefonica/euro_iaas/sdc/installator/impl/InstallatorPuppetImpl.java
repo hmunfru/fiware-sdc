@@ -83,6 +83,7 @@ public class InstallatorPuppetImpl implements Installator {
     private OpenStackRegion openStackRegion;
 
     private SystemPropertiesProvider systemPropertiesProvider;
+
     
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {

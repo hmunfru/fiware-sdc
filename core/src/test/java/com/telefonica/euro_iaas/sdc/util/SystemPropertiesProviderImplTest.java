@@ -34,7 +34,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import com.telefonica.euro_iaas.commons.properties.PropertiesProvider;
+import com.telefonica.fiware.commons.properties.PropertiesProvider;
 
 public class SystemPropertiesProviderImplTest {
 

@@ -41,18 +41,6 @@
             <groupId>com.telefonica.iot</groupId>
             <artifactId>commons</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.telefonica.euro_iaas</groupId>
-            <artifactId>commons-properties</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>persistence-api</artifactId>
-                    <groupId>javax.persistence</groupId>
-                </exclusion>
-            </exclusions>
-
-        </dependency>
-
 
         <dependency>
             <groupId>commons-lang</groupId>
