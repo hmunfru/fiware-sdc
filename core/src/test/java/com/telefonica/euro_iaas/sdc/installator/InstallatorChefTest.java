@@ -148,10 +148,14 @@ public class InstallatorChefTest {
         when(recipeNamingGenerator.getUnDeployArtifactRecipe(any(ProductInstance.class))).thenReturn(undeployacrecipe);
 
         propertiesProvider = mock(SystemPropertiesProvider.class);
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME)).thenReturn("10000");
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME)).thenReturn("10000");
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.SDCCLIENT_INSTALLED_IN_NODES)).thenReturn("false");
 
         installator = spy(new InstallatorChefImpl());
         installator.setRecipeNamingGenerator(recipeNamingGenerator);
         installator.setChefNodeDao(chefNodeDao);
+        installator.setSystemPropertiesProvider(propertiesProvider);
         installator.setPropertiesProvider(propertiesProvider);
         installator.setSdcClientUtils(sdcClientUtils);
         doNothing().when(installator).sleep(10000);
@@ -166,8 +170,8 @@ public class InstallatorChefTest {
 
     @Test
     public void uninstallTest_OK() throws InstallatorException, NodeExecutionException {
-
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "uninstall", "token");
+    	
+    	installator.callService(productInstance, host, new ArrayList<Attribute>(), "uninstall", "token");
     }
 
     @Test

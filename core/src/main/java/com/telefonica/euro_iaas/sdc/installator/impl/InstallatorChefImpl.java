@@ -205,9 +205,11 @@ public class InstallatorChefImpl extends BaseInstallableInstanceManagerChef impl
         int time = 5000;
         int checkTime = 10000;
         Date fechaAhora = new Date();
-        int INSTALLATION_MAXTIME = Integer.parseInt(systemPropertiesProvider
-        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME));
+        String installation_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME);
         
+        int INSTALLATION_MAXTIME = Integer.parseInt(installation_timeout);
+       
         while (!isExecuted) {
             log.info("INSTALLATION_MAXTIME: " + INSTALLATION_MAXTIME + " and time: " + time);
             try {
