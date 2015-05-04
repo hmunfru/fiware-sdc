@@ -232,7 +232,7 @@ public class InstallatorPuppetTest {
         InputStream in = IOUtils.toInputStream(GET_NODES, "UTF-8");
         when(entity.getContent()).thenReturn(in);
         VM vm = new VM("aaaa-dddfafff-1-000081", "ip", "abasd-tt-1-000081", "domain");
-        puppetInstallator.MAX_TIME = 10000;
+        puppetInstallator.INSTALLATION_MAX_TIME = 10000;
         puppetInstallator.checkRecipeExecution(vm, "recipe", "token");
 
     }
@@ -246,7 +246,7 @@ public class InstallatorPuppetTest {
 
         InputStream in = IOUtils.toInputStream(GET_NODES, "UTF-8");
         when(entity.getContent()).thenReturn(in);
-        puppetInstallator.MAX_TIME = 10000;
+        puppetInstallator.INSTALLATION_MAX_TIME = 10000;
         VM vm = new VM("aaaa-dddfafff-1-000081", "ip", "aaaa-dddfafff-1-000081", "domain");
         puppetInstallator.checkRecipeExecution(vm, "recipe", "token");
 
