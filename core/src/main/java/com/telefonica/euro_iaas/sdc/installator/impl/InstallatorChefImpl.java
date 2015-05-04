@@ -308,12 +308,13 @@ public class InstallatorChefImpl extends BaseInstallableInstanceManagerChef impl
     }
     
     /**
-     * Gets the system properties provider.
+     * Sets the system properties provider.
      * 
-     * @return the systemPropertiesProvider
+     * @param pSystemPropertiesProvider
+     *            the systemPropertiesProvider to set
      */
-    public final SystemPropertiesProvider getSystemPropertiesProvider() {
-        return systemPropertiesProvider;
+    public final void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
     }
 
 }

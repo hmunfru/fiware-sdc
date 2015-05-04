@@ -83,7 +83,7 @@ public class InstallatorPuppetImpl implements Installator {
     private OpenStackRegion openStackRegion;
 
     private SystemPropertiesProvider systemPropertiesProvider;
-
+    
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
         try {
@@ -273,8 +273,9 @@ public class InstallatorPuppetImpl implements Installator {
         boolean isExecuted = false;
         int time = 5000;
         int incremental_time = 10000;
-        int INSTALLATION_MAXTIME = Integer.parseInt(systemPropertiesProvider
-        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME));
+        String installation_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME);
+        int INSTALLATION_MAXTIME = Integer.parseInt(installation_timeout);
         
         while (!isExecuted) {
             log.info("INSTALLATION_MAXTIME: " + INSTALLATION_MAXTIME + " and time: " + time);
@@ -358,8 +359,10 @@ public class InstallatorPuppetImpl implements Installator {
         String response = "RESPONSE";
         int time = 10000;
         int check_time = 10000;
-        int REGISTRATION_MAXTIME = Integer.parseInt(systemPropertiesProvider
-        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME));
+        String registration_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME);
+        
+        int REGISTRATION_MAXTIME = Integer.parseInt(registration_timeout);
         
         while (!response.contains(hostname)) {
 
@@ -419,11 +422,12 @@ public class InstallatorPuppetImpl implements Installator {
     }
     
     /**
-     * Gets the system properties provider.
+     * Sets the system properties provider.
      * 
-     * @return the systemPropertiesProvider
+     * @param pSystemPropertiesProvider
+     *            the systemPropertiesProvider to set
      */
-    public final SystemPropertiesProvider getSystemPropertiesProvider() {
-        return systemPropertiesProvider;
+    public final void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
     }
 }
