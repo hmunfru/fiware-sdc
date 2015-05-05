@@ -368,7 +368,7 @@ public class InstallatorPuppetImpl implements Installator {
         while (!response.contains(hostname)) {
 
             try {
-                log.info("Checking node : " + hostname + " time:" + time);
+            	log.info("Checking node : " + hostname + " REGISTRATION_MAXTIME: " + REGISTRATION_MAXTIME + " time:" + time);
                 if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in puppet master";
                     log.info(errorMesg);
