@@ -53,7 +53,6 @@ import com.telefonica.euro_iaas.sdc.exception.CanNotCallPuppetException;
 import com.telefonica.euro_iaas.sdc.exception.InstallatorException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidInstallProductRequestException;
 import com.telefonica.euro_iaas.sdc.exception.NodeExecutionException;
-import com.telefonica.euro_iaas.sdc.exception.OpenStackException;
 import com.telefonica.euro_iaas.sdc.exception.SdcRuntimeException;
 import com.telefonica.euro_iaas.sdc.installator.Installator;
 import com.telefonica.euro_iaas.sdc.keystoneutils.OpenStackRegion;
@@ -65,6 +64,7 @@ import com.telefonica.euro_iaas.sdc.model.dto.NodeDto;
 import com.telefonica.euro_iaas.sdc.model.dto.PuppetNode;
 import com.telefonica.euro_iaas.sdc.model.dto.VM;
 import com.telefonica.euro_iaas.sdc.util.HttpsClient;
+import com.telefonica.fiware.commons.openstack.auth.exception.OpenStackException;
 
 /**
  * Class to dela with installs through puppetwrapper
@@ -80,8 +80,9 @@ public class InstallatorPuppetImpl implements Installator {
 
     private OpenStackRegion openStackRegion;
 
-    public static int MAX_TIME = 360000;
-
+    public static int REGISTRATION_MAX_TIME = 900000;
+    public static int INSTALLATION_MAX_TIME = 1200000;
+    
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
         try {
@@ -92,7 +93,7 @@ public class InstallatorPuppetImpl implements Installator {
         }
 
         try {
-           checkRecipeExecution(vm, product.getProduct().getName(), token);
+            checkRecipeExecution(vm, product.getProduct().getName(), token);
         } catch (NodeExecutionException e) {
             // even if execution fails want to unassign the recipe
             log.debug(e.getMessage());
@@ -158,7 +159,7 @@ public class InstallatorPuppetImpl implements Installator {
         String puppetUrl = null;
 
         try {
-            puppetUrl = openStackRegion.getPuppetWrapperEndPoint(token);
+            puppetUrl = openStackRegion.getPuppetWrapperEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -207,8 +208,7 @@ public class InstallatorPuppetImpl implements Installator {
         HttpResponse response;
 
         log.info("Calling puppetWrapper " + action);
-        log.info("connecting to puppetURL: " + "puppetURL: " + puppetUrl + "v2/node/" + vm.getHostname()
-                         + "/" + action);
+        log.info("connecting to puppetURL: " + "puppetURL: " + puppetUrl + "v2/node/" + vm.getHostname() + "/" + action);
         log.info("payload: " + payload);
         try {
             int statusCode = httpsClient.doHttps(HttpMethod.POST, puppetUrl + "v2/node/" + vm.getHostname() + "/"
@@ -273,9 +273,9 @@ public class InstallatorPuppetImpl implements Installator {
         int time = 5000;
         int incremental_time = 10000;
         while (!isExecuted) {
-            log.info("MAX_TIME: " + MAX_TIME + " and time: " + time);
+            log.info("INSTALLATION_MAX_TIME: " + INSTALLATION_MAX_TIME + " and time: " + time);
             try {
-                if (time > MAX_TIME) {
+                if (time > INSTALLATION_MAX_TIME) {
                     String errorMesg = "Module " + module + " could not be executed in " + vm.getHostname();
                     log.info(errorMesg);
                     // unassignRecipes(vm, recipe, token);
@@ -329,7 +329,7 @@ public class InstallatorPuppetImpl implements Installator {
     private String getNodes(String token) throws SdcRuntimeException {
         String puppetServerUrl = null;
         try {
-            puppetServerUrl = openStackRegion.getPuppetDBEndPoint(token);
+            puppetServerUrl = openStackRegion.getPuppetDBEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -345,7 +345,8 @@ public class InstallatorPuppetImpl implements Installator {
             return response;
         } catch (Exception e) {
             log.warn(e.getMessage());
-            throw new SdcRuntimeException("It is not possible to connect with puppet server Url" + e.getMessage());
+            throw new SdcRuntimeException("It is not possible to connect with puppet server in "+url+". Error: " + e
+                    .getMessage());
         }
     }
 
@@ -357,7 +358,7 @@ public class InstallatorPuppetImpl implements Installator {
 
             try {
                 log.info("Checking node : " + hostname + " time:" + time);
-                if (time > MAX_TIME) {
+                if (time > REGISTRATION_MAX_TIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in puppet master";
                     log.info(errorMesg);
                     throw new CanNotCallPuppetException(errorMesg);
