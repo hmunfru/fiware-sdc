@@ -190,6 +190,7 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
     private void validateMetadata(List<Metadata> metadatas) throws InvalidProductException {
     	if (areMetadataDuplicated(metadatas)) {
             String msg = "There are some metadatas duplicated in the product payload";
+            log.warning (msg);
             throw new InvalidProductException(msg);
         }
     	
