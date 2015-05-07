@@ -45,6 +45,8 @@ import com.telefonica.euro_iaas.sdc.model.Product;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
+import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
+import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductSearchCriteria;
 import com.telefonica.euro_iaas.sdc.rest.exception.APIException;
 
 public class ProductResourceValidatorImpl extends MultipartValidator implements ProductResourceValidator {
@@ -137,6 +139,18 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
 
         commonValidation(product);
 
+    }
+    
+    public void validateDelete (Product product) throws InvalidEntityException {
+    	ProductReleaseSearchCriteria criteria = new ProductReleaseSearchCriteria();
+    	criteria.setProduct(product);
+     
+    	List<ProductRelease> productReleases = productReleaseManager.findReleasesByCriteria(criteria);
+            
+    	if (productReleases.size() > 0){
+    	     String mes = "The product " + product.getName() + " has releases associated";
+    		 throw new InvalidEntityException(product, new Exception(mes)));
+    	}
     }
 
     private void commonValidation(Product product) throws InvalidEntityException {

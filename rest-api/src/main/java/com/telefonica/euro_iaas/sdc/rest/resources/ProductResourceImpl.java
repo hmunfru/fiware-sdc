@@ -220,11 +220,16 @@ public class ProductResourceImpl implements ProductResource {
      */
     public void delete(String name)  throws APIException {
         Product product;
+        
         try {
             product = productManager.load(name);
+            validator.validateDelete(product);
         } catch (EntityNotFoundException e) {
         	log.warning("EntityNotFoundException: " + e.getMessage());
         	throw new APIException(new EntityNotFoundException(Product.class,name, e));
+        } catch (InvalidEntityException e2) {
+        	log.warning("InvalidEntityException: " + e.getMessage());
+        	throw new APIException(new InvalidEntityException(Product.class,name, e));
         }
         productManager.delete(product);
     }

@@ -85,4 +85,11 @@ public interface ProductResourceValidator {
      * @throws EntityNotFoundException
      */
     public void validateLoad(ReleaseDto releaseDto) throws EntityNotFoundException;
+    
+    /**
+     * 
+     * @param product
+     * @throws 
+     */
+    public void validateDelete (Product product) throws InvalidEntityException;
 }
