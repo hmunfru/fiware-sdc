@@ -72,8 +72,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
 
     private String NODE_NOT_FOUND_PATTERN = "404";
     private String NODES_PATH = "/nodes";
-    private static final int MAX_TIME = 900000;
-
+   
     public ChefNode loadNodeFromHostname(String hostname, String token) throws EntityNotFoundException,
             CanNotCallChefException {
         log.info("Loading nodes " + hostname);
@@ -250,11 +249,14 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         String response = "RESPONSE";
         int time = 5000;
         int checkTime = 10000;
+        int REGISTRATION_MAXTIME = Integer.parseInt(propertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME));
+        
         while (!response.contains(hostname)) {
 
             try {
-                log.info("Checking node : " + hostname + " MAX_TIME: " + MAX_TIME + " time:" + time);
-                if (time > MAX_TIME) {
+                log.info("Checking node : " + hostname + " REGISTRATION_MAXTIME: " + REGISTRATION_MAXTIME + " time:" + time);
+                if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in ChefServer";
                     log.info(errorMesg);
                     throw new CanNotCallChefException(errorMesg);

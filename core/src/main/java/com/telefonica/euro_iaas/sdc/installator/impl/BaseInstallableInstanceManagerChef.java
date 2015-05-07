@@ -61,8 +61,6 @@ public class BaseInstallableInstanceManagerChef {
     protected ChefNodeDao chefNodeDao;
     protected SDCClientUtils sdcClientUtils;
 
-    protected int MAX_TIME = 1200000;
-
     protected static Logger log = LoggerFactory.getLogger(BaseInstallableInstanceManagerChef.class);
 
     protected void callChefUpgrade(String recipe, VM vm, String token) throws InstallatorException,

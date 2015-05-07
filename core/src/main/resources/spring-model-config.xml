@@ -41,6 +41,7 @@
         <property name="recipeNamingGenerator" ref="recipeNamingGenerator"/>
         <property name="chefNodeDao" ref="chefNodeDao"/>
         <property name="ip2vm" ref="ip2vm"/>
+        <property name="systemPropertiesProvider" ref="systemPropertiesProvider"></property>
     </bean>
 
     <bean id="puppetInstallator" lazy-init="true"
@@ -48,6 +49,7 @@
         <property name="client" ref="httpClient"/>
         <property name="httpsClient" ref="httpsClient"/>
         <property name="openStackRegion" ref="openStackRegion"/>
+        <property name="systemPropertiesProvider" ref="systemPropertiesProvider"></property>
     </bean>
 
     <bean id="httpClient" lazy-init="true"

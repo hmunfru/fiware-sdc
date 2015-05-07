@@ -64,7 +64,9 @@ import com.telefonica.euro_iaas.sdc.model.dto.NodeDto;
 import com.telefonica.euro_iaas.sdc.model.dto.PuppetNode;
 import com.telefonica.euro_iaas.sdc.model.dto.VM;
 import com.telefonica.euro_iaas.sdc.util.HttpsClient;
+import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
 import com.telefonica.fiware.commons.openstack.auth.exception.OpenStackException;
+
 
 /**
  * Class to dela with installs through puppetwrapper
@@ -80,8 +82,8 @@ public class InstallatorPuppetImpl implements Installator {
 
     private OpenStackRegion openStackRegion;
 
-    public static int REGISTRATION_MAX_TIME = 900000;
-    public static int INSTALLATION_MAX_TIME = 1200000;
+    private SystemPropertiesProvider systemPropertiesProvider;
+
     
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
@@ -272,10 +274,14 @@ public class InstallatorPuppetImpl implements Installator {
         boolean isExecuted = false;
         int time = 5000;
         int incremental_time = 10000;
+        String installation_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME);
+        int INSTALLATION_MAXTIME = Integer.parseInt(installation_timeout);
+        
         while (!isExecuted) {
-            log.info("INSTALLATION_MAX_TIME: " + INSTALLATION_MAX_TIME + " and time: " + time);
+            log.info("INSTALLATION_MAXTIME: " + INSTALLATION_MAXTIME + " and time: " + time);
             try {
-                if (time > INSTALLATION_MAX_TIME) {
+                if (time > INSTALLATION_MAXTIME) {
                     String errorMesg = "Module " + module + " could not be executed in " + vm.getHostname();
                     log.info(errorMesg);
                     // unassignRecipes(vm, recipe, token);
@@ -354,11 +360,16 @@ public class InstallatorPuppetImpl implements Installator {
         String response = "RESPONSE";
         int time = 10000;
         int check_time = 10000;
+        String registration_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME);
+        
+        int REGISTRATION_MAXTIME = Integer.parseInt(registration_timeout);
+        
         while (!response.contains(hostname)) {
 
             try {
-                log.info("Checking node : " + hostname + " time:" + time);
-                if (time > REGISTRATION_MAX_TIME) {
+            	log.info("Checking node : " + hostname + " REGISTRATION_MAXTIME: " + REGISTRATION_MAXTIME + " time:" + time);
+                if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in puppet master";
                     log.info(errorMesg);
                     throw new CanNotCallPuppetException(errorMesg);
@@ -409,5 +420,15 @@ public class InstallatorPuppetImpl implements Installator {
      */
     public void sleep(long millis) throws InterruptedException {
         Thread.sleep(millis);
+    }
+    
+    /**
+     * Sets the system properties provider.
+     * 
+     * @param pSystemPropertiesProvider
+     *            the systemPropertiesProvider to set
+     */
+    public final void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
     }
 }

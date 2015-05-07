@@ -144,13 +144,12 @@ public class InstallatorPuppetTest {
         when(response.getStatusLine()).thenReturn(statusLine);
 
         propertiesProvider = mock(SystemPropertiesProvider.class);
-        when(propertiesProvider.getProperty("PUPPET_MASTER_URL")).thenReturn(
-                "http://130.206.82.190:8080/puppetwrapper/");
-
+        
         puppetInstallator = spy(new InstallatorPuppetImpl());
         puppetInstallator.setClient(client);
         puppetInstallator.setOpenStackRegion(openStackRegion);
         puppetInstallator.setHttpsClient(httpsClient);
+        puppetInstallator.setSystemPropertiesProvider(propertiesProvider);
         doNothing().when(puppetInstallator).sleep(10000);
 
         when(openStackRegion.getPuppetWrapperEndPoint()).thenReturn("http://");
@@ -201,6 +200,7 @@ public class InstallatorPuppetTest {
 
         when(statusLine.getStatusCode()).thenReturn(200).thenReturn(500);
         when(openStackRegion.getPuppetDBEndPoint()).thenReturn("http");
+        when(propertiesProvider.getProperty("registration.timeout")).thenReturn("10000");
 
         InputStream in = IOUtils.toInputStream(GET_NODES, "UTF-8");
         when(entity.getContent()).thenReturn(in);
@@ -228,11 +228,12 @@ public class InstallatorPuppetTest {
 
         when(statusLine.getStatusCode()).thenReturn(200).thenReturn(500);
         when(openStackRegion.getPuppetDBEndPoint()).thenReturn("http");
-
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME)).thenReturn("10000");
+        
         InputStream in = IOUtils.toInputStream(GET_NODES, "UTF-8");
         when(entity.getContent()).thenReturn(in);
         VM vm = new VM("aaaa-dddfafff-1-000081", "ip", "abasd-tt-1-000081", "domain");
-        puppetInstallator.INSTALLATION_MAX_TIME = 10000;
+
         puppetInstallator.checkRecipeExecution(vm, "recipe", "token");
 
     }
@@ -243,11 +244,13 @@ public class InstallatorPuppetTest {
 
         when(statusLine.getStatusCode()).thenReturn(200).thenReturn(500);
         when(openStackRegion.getPuppetDBEndPoint()).thenReturn("http");
-
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME)).thenReturn("1000");
+        
         InputStream in = IOUtils.toInputStream(GET_NODES, "UTF-8");
         when(entity.getContent()).thenReturn(in);
-        puppetInstallator.INSTALLATION_MAX_TIME = 10000;
+
         VM vm = new VM("aaaa-dddfafff-1-000081", "ip", "aaaa-dddfafff-1-000081", "domain");
+        
         puppetInstallator.checkRecipeExecution(vm, "recipe", "token");
 
     }
@@ -270,6 +273,7 @@ public class InstallatorPuppetTest {
     public void testCallService_attributes_all_OK() throws InstallatorException, NodeExecutionException, IOException,
             KeyManagementException, NoSuchAlgorithmException {
 
+    	when(propertiesProvider.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME)).thenReturn("10000");
         // when(statusLine.getStatusCode()).thenReturn(200);
         when(
                 httpsClient.doHttps(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
@@ -340,7 +344,8 @@ public class InstallatorPuppetTest {
 
         when(host.canWorkWithInstallatorServer()).thenReturn(true);
         when(host.getHostname()).thenReturn("aaa");
-
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME)).thenReturn("10000");
+        
         HttpResponse resp = mock(HttpResponse.class);
         HttpEntity httpEntity = mock(HttpEntity.class);
         InputStream in = IOUtils.toInputStream("aaa", "UTF-8");
@@ -370,7 +375,8 @@ public class InstallatorPuppetTest {
 
         when(host.canWorkWithInstallatorServer()).thenReturn(true);
         when(host.getHostname()).thenReturn("aaa");
-
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME)).thenReturn("10000");
+        
         HttpResponse resp = mock(HttpResponse.class);
         HttpEntity httpEntity = mock(HttpEntity.class);
         InputStream in = IOUtils.toInputStream("RESPONSE", "UTF-8");
