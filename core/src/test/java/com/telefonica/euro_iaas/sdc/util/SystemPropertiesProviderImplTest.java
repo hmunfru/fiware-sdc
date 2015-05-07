@@ -96,5 +96,35 @@ public class SystemPropertiesProviderImplTest {
         assertEquals(value, new Integer(1));
         verify(propertiesProvider).load("namespace");
     }
+    
+    @Test
+    public void shouldGetPropertyTIMEOUTS() {
+    	 // given
+
+        SystemPropertiesProviderImpl systemPropertiesProvider = new SystemPropertiesProviderImpl();
+        PropertiesProvider propertiesProvider = mock(PropertiesProvider.class);
+        systemPropertiesProvider.setPropertiesProvider(propertiesProvider);
+        systemPropertiesProvider.setNamespace("namespace");
+
+        Properties properties = new Properties();
+        properties.put("registration.timeout", "900000");
+        properties.put("installation.timeout", "1200000");
+
+        // when
+
+        when(propertiesProvider.load("namespace")).thenReturn(properties);
+        Integer registration_value = systemPropertiesProvider.getIntProperty("registration.timeout");
+        Integer installation_value = systemPropertiesProvider.getIntProperty("installation.timeout");
+        
+        //int registration_value_int = registration_value.intValue();
+        //int installation_value_int = installation_value.intValue();
+        
+        // then
+        assertNotNull(registration_value);
+        assertNotNull(installation_value);
+        
+        assertEquals(registration_value, new Integer(900000));
+        assertEquals(installation_value, new Integer(1200000));
+    }
 
 }
