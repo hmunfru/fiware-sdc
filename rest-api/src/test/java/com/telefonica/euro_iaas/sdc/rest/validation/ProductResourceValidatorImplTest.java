@@ -54,11 +54,8 @@ import com.telefonica.euro_iaas.sdc.model.Product;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
-<<<<<<< HEAD
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
-=======
 import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
->>>>>>> 44dbc03de49a930eb35dc61045c8ba08d83714d7
 
 public class ProductResourceValidatorImplTest extends ValidatorUtils {
 
@@ -355,7 +352,6 @@ public class ProductResourceValidatorImplTest extends ValidatorUtils {
                 new EntityNotFoundException(ProductRelease.class, "", productRelease));
         productResourceValidator.validateInsert("name", productRelease);
     }
-<<<<<<< HEAD
     
     @Test(expected = InvalidEntityException.class)
     public void testValidateProductDeleteWithProductrelease() throws Exception {
@@ -379,8 +375,8 @@ public class ProductResourceValidatorImplTest extends ValidatorUtils {
     	when(productReleaseManager.findReleasesByCriteria(any(ProductReleaseSearchCriteria.class))).thenReturn(
         		productReleases);
         productResourceValidator.validateDelete(product);
-=======
-
+    }
+    
     @Test
     public void testValidateAttributes() throws InvalidEntityException, AlreadyExistsEntityException,
             InvalidProductException {
@@ -531,6 +527,5 @@ public class ProductResourceValidatorImplTest extends ValidatorUtils {
         product.setName(name);
         
         productResourceValidator.validateInsert(product);
->>>>>>> 44dbc03de49a930eb35dc61045c8ba08d83714d7
     }
 }
