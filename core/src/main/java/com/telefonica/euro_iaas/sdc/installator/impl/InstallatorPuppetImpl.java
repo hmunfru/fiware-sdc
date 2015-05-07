@@ -28,48 +28,63 @@ import static java.text.MessageFormat.format;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.apache.http.HttpEntity;
+import javax.ws.rs.HttpMethod;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.telefonica.euro_iaas.sdc.exception.CanNotCallPuppetException;
 import com.telefonica.euro_iaas.sdc.exception.InstallatorException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidInstallProductRequestException;
 import com.telefonica.euro_iaas.sdc.exception.NodeExecutionException;
-import com.telefonica.euro_iaas.sdc.exception.OpenStackException;
 import com.telefonica.euro_iaas.sdc.exception.SdcRuntimeException;
 import com.telefonica.euro_iaas.sdc.installator.Installator;
 import com.telefonica.euro_iaas.sdc.keystoneutils.OpenStackRegion;
 import com.telefonica.euro_iaas.sdc.model.Attribute;
 import com.telefonica.euro_iaas.sdc.model.ProductInstance;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
+import com.telefonica.euro_iaas.sdc.model.dto.AttributeDto;
 import com.telefonica.euro_iaas.sdc.model.dto.NodeDto;
 import com.telefonica.euro_iaas.sdc.model.dto.PuppetNode;
 import com.telefonica.euro_iaas.sdc.model.dto.VM;
+import com.telefonica.euro_iaas.sdc.util.HttpsClient;
+import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
+import com.telefonica.fiware.commons.openstack.auth.exception.OpenStackException;
 
+
+/**
+ * Class to dela with installs through puppetwrapper
+ */
 public class InstallatorPuppetImpl implements Installator {
+
+    private static final Object IPALL = "IPALL";
 
     private static Logger log = LoggerFactory.getLogger(InstallatorPuppetImpl.class);
 
     private HttpClient client;
+    private HttpsClient httpsClient;
 
     private OpenStackRegion openStackRegion;
 
-    private String NODE_NOT_FOUND_PATTERN = "404";
-    private String NODES_PATH = "/nodes";
-    public static int MAX_TIME = 360000;
+    private SystemPropertiesProvider systemPropertiesProvider;
 
+    
     public void callService(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException, NodeExecutionException {
         try {
@@ -80,7 +95,7 @@ public class InstallatorPuppetImpl implements Installator {
         }
 
         try {
-            isRecipeExecuted(vm, product.getProduct().getName(), token);
+            checkRecipeExecution(vm, product.getProduct().getName(), token);
         } catch (NodeExecutionException e) {
             // even if execution fails want to unassign the recipe
             log.debug(e.getMessage());
@@ -88,7 +103,7 @@ public class InstallatorPuppetImpl implements Installator {
         }
 
         try {
-            isRecipeExecuted(vm, product.getProduct().getName(), token);
+            checkRecipeExecution(vm, product.getProduct().getName(), token);
         } catch (NodeExecutionException e) {
             log.warn("It is not possible execute the module " + product.getProduct().getName() + " in node "
                     + vm.getHostname());
@@ -99,7 +114,11 @@ public class InstallatorPuppetImpl implements Installator {
     public void generateFilesinPuppetMaster(VM vm, String vdc, ProductRelease product, String action, String token)
             throws InstallatorException {
         String puppetUrl = null;
-        callPuppetMaster(vm, vdc, product, action, token, null);
+        try {
+            callPuppetMaster(vm, vdc, product, action, token, null);
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            throw new InstallatorException(e.getMessage());
+        }
 
     }
 
@@ -107,7 +126,21 @@ public class InstallatorPuppetImpl implements Installator {
     public void callService(ProductInstance productInstance, VM vm, List<Attribute> attributes, String action,
             String token) throws InstallatorException, NodeExecutionException {
 
-        callPuppetMaster(vm, productInstance.getVdc(), productInstance.getProductRelease(), action, token, attributes);
+        try {
+            callPuppetMaster(vm, productInstance.getVdc(), productInstance.getProductRelease(), action, token,
+                    attributes);
+        } catch (KeyManagementException | NoSuchAlgorithmException e1) {
+            throw new InstallatorException(e1.getMessage());
+        }
+        try {
+            checkRecipeExecution(vm, productInstance.getProductRelease().getProduct().getName(), token);
+        } catch (NodeExecutionException e) {
+            String str = "It is not possible execute the module "
+                    + productInstance.getProductRelease().getProduct().getName() + " in node " + vm.getHostname();
+            log.warn(str);
+            throw e;
+        }
+
     }
 
     @Override
@@ -124,19 +157,32 @@ public class InstallatorPuppetImpl implements Installator {
     }
 
     private void callPuppetMaster(VM vm, String vdc, ProductRelease product, String action, String token,
-            List<Attribute> attributes) throws InstallatorException {
+            List<Attribute> attributes) throws InstallatorException, KeyManagementException, NoSuchAlgorithmException {
         String puppetUrl = null;
 
         try {
-            puppetUrl = openStackRegion.getPuppetWrapperEndPoint(token);
+            puppetUrl = openStackRegion.getPuppetWrapperEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
-        HttpPost postInstall = new HttpPost(puppetUrl + "v2/node/" + vm.getHostname() + "/" + action);
 
-        postInstall.addHeader("Content-Type", "application/json");
+        List<AttributeDto> newAttributes = null;
+        if (attributes != null) {
+            newAttributes = formatAttributesForPuppet(attributes);
+        }
 
-        NodeDto nodeDto = new NodeDto(vdc, product.getProduct().getName(), product.getVersion(), attributes);
+        // HttpPost postInstall = new HttpPost(puppetUrl + "v2/node/" +
+        // vm.getHostname() + "/" + action);
+        //
+        // postInstall.addHeader("Content-Type", "application/json");
+        // postInstall.setHeader("X-Auth-Token", token);
+        // postInstall.setHeader("Tenant-Id", vdc);
+
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(HttpsClient.HEADER_AUTH, token);
+        headers.put(HttpsClient.HEADER_TENNANT, vdc);
+
+        NodeDto nodeDto = new NodeDto(vdc, product.getProduct().getName(), product.getVersion(), newAttributes);
         ObjectMapper mapper = new ObjectMapper();
         StringEntity input;
         String payload = "";
@@ -155,7 +201,7 @@ public class InstallatorPuppetImpl implements Installator {
         }
 
         input.setContentType("application/json");
-        postInstall.setEntity(input);
+        // postInstall.setEntity(input);
 
         // System.out.println("puppetURL: " + puppetUrl + "v2/node/"+
         // vm.getHostname() + "/"
@@ -167,10 +213,8 @@ public class InstallatorPuppetImpl implements Installator {
         log.info("connecting to puppetURL: " + "puppetURL: " + puppetUrl + "v2/node/" + vm.getHostname() + "/" + action);
         log.info("payload: " + payload);
         try {
-            response = client.execute(postInstall);
-            int statusCode = response.getStatusLine().getStatusCode();
-            HttpEntity entity = response.getEntity();
-            EntityUtils.consume(entity);
+            int statusCode = httpsClient.doHttps(HttpMethod.POST, puppetUrl + "v2/node/" + vm.getHostname() + "/"
+                    + action, payload, headers);
 
             if (statusCode != 200) {
                 String msg = format("[puppet " + action + "] response code was: {0}", statusCode);
@@ -182,15 +226,8 @@ public class InstallatorPuppetImpl implements Installator {
             log.info("Calling puppetWrapper generate");
             log.info(puppetUrl + "v2/node/" + vm.getHostname() + "/generate");
 
-            // generate files in puppet master
-            HttpGet getGenerate = new HttpGet(puppetUrl + "v2/node/" + vm.getHostname() + "/generate");
-
-            getGenerate.addHeader("Content-Type", "application/json");
-
-            response = client.execute(getGenerate);
-            statusCode = response.getStatusLine().getStatusCode();
-            entity = response.getEntity();
-            EntityUtils.consume(entity);
+            statusCode = httpsClient.doHttps(HttpMethod.GET, puppetUrl + "v2/node/" + vm.getHostname() + "/generate",
+                    "", headers);
 
             if (statusCode != 200) {
                 String msg = format("generate files response code was: {0}", statusCode);
@@ -207,23 +244,51 @@ public class InstallatorPuppetImpl implements Installator {
         }
     }
 
-    public void isRecipeExecuted(VM vm, String module, String token) throws NodeExecutionException,
+    public List<AttributeDto> formatAttributesForPuppet(List<Attribute> attributes) {
+        List<AttributeDto> newAtts = new ArrayList<AttributeDto>();
+
+        for (Attribute att : attributes) {
+            AttributeDto attDto = new AttributeDto();
+            attDto.setKey(att.getKey());
+            attDto.setDescription(att.getDescription());
+            if (att.getType().equals(IPALL)) {
+                String newValue = "[";
+                StringTokenizer st = new StringTokenizer(att.getValue(), ",");
+                while (st.hasMoreElements()) {
+                    newValue = newValue + "'" + st.nextElement() + "', ";
+                }
+                newValue = newValue.substring(0, newValue.length() - 2);
+                newValue = newValue + "]";
+                attDto.setValue(newValue);
+            } else {
+                attDto.setValue(att.getValue());
+            }
+            newAtts.add(attDto);
+        }
+        return newAtts;
+    }
+
+    public void checkRecipeExecution(VM vm, String module, String token) throws NodeExecutionException,
             InstallatorException {
 
         boolean isExecuted = false;
         int time = 5000;
         int incremental_time = 10000;
+        String installation_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME);
+        int INSTALLATION_MAXTIME = Integer.parseInt(installation_timeout);
+        
         while (!isExecuted) {
-            log.info("MAX_TIME: " + MAX_TIME + " and time: " + time);
+            log.info("INSTALLATION_MAXTIME: " + INSTALLATION_MAXTIME + " and time: " + time);
             try {
-                if (time > MAX_TIME) {
+                if (time > INSTALLATION_MAXTIME) {
                     String errorMesg = "Module " + module + " could not be executed in " + vm.getHostname();
                     log.info(errorMesg);
                     // unassignRecipes(vm, recipe, token);
                     throw new NodeExecutionException(errorMesg);
                 }
 
-                Thread.sleep(incremental_time);
+                sleep(incremental_time);
 
                 PuppetNode node = loadNode(vm.getHostname(), token);
                 log.debug("Get time catalog " + node.getCatalogTimestamp());
@@ -270,7 +335,7 @@ public class InstallatorPuppetImpl implements Installator {
     private String getNodes(String token) throws SdcRuntimeException {
         String puppetServerUrl = null;
         try {
-            puppetServerUrl = openStackRegion.getPuppetDBEndPoint(token);
+            puppetServerUrl = openStackRegion.getPuppetDBEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -286,7 +351,8 @@ public class InstallatorPuppetImpl implements Installator {
             return response;
         } catch (Exception e) {
             log.warn(e.getMessage());
-            throw new SdcRuntimeException("It is not possible to connect with puppet server Url" + e.getMessage());
+            throw new SdcRuntimeException("It is not possible to connect with puppet server in "+url+". Error: " + e
+                    .getMessage());
         }
     }
 
@@ -294,16 +360,21 @@ public class InstallatorPuppetImpl implements Installator {
         String response = "RESPONSE";
         int time = 10000;
         int check_time = 10000;
+        String registration_timeout = systemPropertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME);
+        
+        int REGISTRATION_MAXTIME = Integer.parseInt(registration_timeout);
+        
         while (!response.contains(hostname)) {
 
             try {
-                log.info("Checking node : " + hostname + " time:" + time);
-                if (time > MAX_TIME) {
+            	log.info("Checking node : " + hostname + " REGISTRATION_MAXTIME: " + REGISTRATION_MAXTIME + " time:" + time);
+                if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in puppet master";
                     log.info(errorMesg);
                     throw new CanNotCallPuppetException(errorMesg);
                 }
-                Thread.sleep(check_time);
+                sleep(check_time);
                 response = getNodes(token);
                 time = time + check_time;
             } catch (Exception e) {
@@ -329,7 +400,7 @@ public class InstallatorPuppetImpl implements Installator {
             String errorMesg = "Node  " + vm.getHostname() + " is not registered in the puppet master "
                     + e.getMessage();
             log.info(errorMesg);
-            throw new InvalidInstallProductRequestException(errorMesg);
+            throw new SdcRuntimeException(errorMesg);
         }
     }
 
@@ -337,4 +408,27 @@ public class InstallatorPuppetImpl implements Installator {
         this.openStackRegion = openStackRegion;
     }
 
+    public void setHttpsClient(HttpsClient httpsClient) {
+        this.httpsClient = httpsClient;
+    }
+
+    /**
+     * Sleep temporarily for the specified milliseconds.
+     * 
+     * @param millis
+     * @throws InterruptedException
+     */
+    public void sleep(long millis) throws InterruptedException {
+        Thread.sleep(millis);
+    }
+    
+    /**
+     * Sets the system properties provider.
+     * 
+     * @param pSystemPropertiesProvider
+     *            the systemPropertiesProvider to set
+     */
+    public final void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
+    }
 }

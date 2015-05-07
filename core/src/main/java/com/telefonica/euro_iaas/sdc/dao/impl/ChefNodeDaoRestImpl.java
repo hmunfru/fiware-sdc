@@ -46,22 +46,20 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
 import com.telefonica.euro_iaas.sdc.dao.ChefClientConfig;
 import com.telefonica.euro_iaas.sdc.dao.ChefNodeDao;
 import com.telefonica.euro_iaas.sdc.exception.CanNotCallChefException;
-import com.telefonica.euro_iaas.sdc.exception.OpenStackException;
 import com.telefonica.euro_iaas.sdc.exception.SdcRuntimeException;
 import com.telefonica.euro_iaas.sdc.keystoneutils.OpenStackRegion;
 import com.telefonica.euro_iaas.sdc.model.dto.ChefNode;
 import com.telefonica.euro_iaas.sdc.util.Configuration;
 import com.telefonica.euro_iaas.sdc.util.MixlibAuthenticationDigester;
 import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.openstack.auth.exception.OpenStackException;
 
 /**
  * Default implementation of ChefNodeManager.
- * 
- * @author Sergio Arroyo
  */
 public class ChefNodeDaoRestImpl implements ChefNodeDao {
 
@@ -74,14 +72,13 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
 
     private String NODE_NOT_FOUND_PATTERN = "404";
     private String NODES_PATH = "/nodes";
-    private static final int MAX_TIME = 90000;
-
+   
     public ChefNode loadNodeFromHostname(String hostname, String token) throws EntityNotFoundException,
             CanNotCallChefException {
         log.info("Loading nodes " + hostname);
         String chefServerUrl = null;
         try {
-            chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+            chefServerUrl = openStackRegion.getChefServerEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -91,12 +88,14 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             Map<String, String> header = getHeaders("GET", path, "");
             log.info(chefServerUrl + path);
             WebTarget webResource = clientConfig.getClient().target(chefServerUrl + path);
-            Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON);
+            Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON);
             for (String key : header.keySet()) {
                 wr = wr.header(key, header.get(key));
             }
-            String stringNodes;
-            stringNodes = IOUtils.toString(wr.get(InputStream.class));
+
+            Response response = wr.get();
+
+            String stringNodes = response.readEntity(String.class);
 
             if (stringNodes == null) {
                 throw new EntityNotFoundException(ChefNode.class, null, "The ChefServer is empty of ChefNodes");
@@ -106,9 +105,12 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             String nodeName = node.getChefNodeName(stringNodes, hostname);
             log.info("node name " + nodeName);
             return loadNode(nodeName, token);
+
             // } catch (UniformInterfaceException e) {
             // throw new CanNotCallChefException(e);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            log.warn("loadNodeFromHostname: ", e.getMessage());
+
             throw new SdcRuntimeException(e);
         }
     }
@@ -121,7 +123,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         log.info("loadNode " + chefNodename);
         String chefServerUrl = null;
         try {
-            chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+            chefServerUrl = openStackRegion.getChefServerEndPoint();
             log.info("chefServerUrl " + chefServerUrl);
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
@@ -139,21 +141,23 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             String url = chefServerUrl + path;
             log.info("url " + url);
             WebTarget webResource = clientConfig.getClient().target(url);
-            Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON);
+            Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON);
             for (String key : header.keySet()) {
                 wr = wr.header(key, header.get(key));
             }
 
-            InputStream inputStream = wr.get(InputStream.class);
-            String stringNode;
-            stringNode = IOUtils.toString(inputStream);
+            Response response = wr.get();
+
+            String stringNode = response.readEntity(String.class);
+
             JSONObject jsonNode = JSONObject.fromObject(stringNode);
 
             ChefNode node = new ChefNode();
             node.fromJson(jsonNode);
+
             return node;
-        } catch (IOException e) {
-            log.warn(e.getMessage());
+        } catch (Exception e) {
+            log.warn("loadNode: ", e.getMessage());
             throw new SdcRuntimeException(e);
         }
     }
@@ -166,7 +170,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         log.info("Update node " + node.getName());
         String chefServerUrl = null;
         try {
-            chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+            chefServerUrl = openStackRegion.getChefServerEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -178,7 +182,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             String payload = node.toJson();
             Map<String, String> header = getHeaders("PUT", path, payload);
 
-            WebTarget webResource = clientConfig.getClient().target(chefServerUrl + path);
+            WebTarget webResource = clientConfig.getClient().target(chefServerUrl).path(path);
 
             Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON);
             wr = wr.accept(MediaType.APPLICATION_JSON);
@@ -186,13 +190,18 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
             for (String key : header.keySet()) {
                 wr = wr.header(key, header.get(key));
             }
-            Response response = wr.put(Entity.text(payload));
+            Response response = wr.put(Entity.json(payload));
 
-            ChefNode updatedNode = response.readEntity(ChefNode.class);
+            String stringNode = response.readEntity(String.class);
+            JSONObject jsonNode = JSONObject.fromObject(stringNode);
+
+            ChefNode updatedNode = new ChefNode();
+            updatedNode.fromJson(jsonNode);
 
             return updatedNode;
 
         } catch (Exception ex) {
+            log.warn("updateNode: ", ex.getMessage());
             throw new SdcRuntimeException(ex);
         }
 
@@ -201,7 +210,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
     public void deleteNode(ChefNode node, String token) throws CanNotCallChefException {
         String chefServerUrl = null;
         try {
-            chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+            chefServerUrl = openStackRegion.getChefServerEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -230,7 +239,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
     public void isNodeRegistered(String hostname, String token) throws CanNotCallChefException {
         String chefServerUrl = null;
         try {
-            chefServerUrl = openStackRegion.getChefServerEndPoint(token);
+            chefServerUrl = openStackRegion.getChefServerEndPoint();
         } catch (OpenStackException e) {
             throw new SdcRuntimeException(e);
         }
@@ -238,19 +247,22 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
         String path = "/nodes";
 
         String response = "RESPONSE";
-        int time = 10000;
+        int time = 5000;
         int checkTime = 10000;
+        int REGISTRATION_MAXTIME = Integer.parseInt(propertiesProvider
+        		.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME));
+        
         while (!response.contains(hostname)) {
 
             try {
-                log.info("Checking node : " + hostname + " time:" + time);
-                if (time > MAX_TIME) {
+                log.info("Checking node : " + hostname + " REGISTRATION_MAXTIME: " + REGISTRATION_MAXTIME + " time:" + time);
+                if (time > REGISTRATION_MAXTIME) {
                     String errorMesg = "Node  " + hostname + " is not registered in ChefServer";
                     log.info(errorMesg);
                     throw new CanNotCallChefException(errorMesg);
                 }
                 log.info("more");
-                Thread.sleep(time);
+                Thread.sleep(checkTime);
 
                 Map<String, String> header = getHeaders("GET", path, "");
                 System.out.println(chefServerUrl + path);
@@ -258,7 +270,8 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
 
                 log.info("web resource");
                 WebTarget webResource = clientConfig.getClient().target(chefServerUrl + path);
-                Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON);
+                Invocation.Builder wr = webResource.request(MediaType.APPLICATION_JSON).accept(
+                        MediaType.APPLICATION_JSON);
                 for (String key : header.keySet()) {
                     System.out.println(key + ":" + header.get(key));
                     wr = wr.header(key, header.get(key));
@@ -267,7 +280,7 @@ public class ChefNodeDaoRestImpl implements ChefNodeDao {
                 log.info("geting");
                 response = IOUtils.toString(wr.get(InputStream.class));
                 log.info(response);
-                time += time;
+                time = time + checkTime;
 
             } catch (IOException e) {
                 log.warn(e.getMessage());

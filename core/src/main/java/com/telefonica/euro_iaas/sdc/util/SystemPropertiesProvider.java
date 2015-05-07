@@ -56,6 +56,12 @@ public interface SystemPropertiesProvider {
     public static final String SDCCLIENT_INSTALLED_IN_NODES = "sdcclient.installed.innodes";
 
 	public static final String CLOUD_SYSTEM = "openstack-tcloud.cloudSystem";
+	
+	public static final String AVAILABLE_ATTRIBUTE_TYPES = "available.attribute.types";
+	
+	//Installation and Registration MAX_TIME
+	public static final String REGISTRATION_MAXTIME = "registration.timeout";
+	public static final String INSTALLATION_MAXTIME = "installation.timeout";
 
 
     

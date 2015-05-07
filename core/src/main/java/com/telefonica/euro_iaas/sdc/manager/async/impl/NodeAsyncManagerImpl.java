@@ -42,12 +42,14 @@ import com.telefonica.euro_iaas.sdc.exception.NodeExecutionException;
 import com.telefonica.euro_iaas.sdc.manager.NodeManager;
 import com.telefonica.euro_iaas.sdc.manager.async.NodeAsyncManager;
 import com.telefonica.euro_iaas.sdc.manager.async.TaskManager;
+import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
 import com.telefonica.euro_iaas.sdc.model.Task;
 import com.telefonica.euro_iaas.sdc.model.Task.TaskStates;
 import com.telefonica.euro_iaas.sdc.model.TaskError;
 import com.telefonica.euro_iaas.sdc.model.TaskReference;
 
 import com.telefonica.euro_iaas.sdc.util.TaskNotificator;
+import org.springframework.scheduling.annotation.Async;
 
 /**
  * @author alberts
@@ -59,7 +61,20 @@ public class NodeAsyncManagerImpl implements NodeAsyncManager {
     private TaskManager taskManager;
     private TaskNotificator taskNotificator;
     private NodeManager nodeManager;
+    private SystemPropertiesProvider systemPropertiesProvider;
 
+    /**
+     * It deletes the node.
+     * @param vdc
+     * @param nodeName
+     *            the name of the node to be deleted from chef server / puppet master
+     * @param token
+     * @param task
+     *            the task which contains the information about the async execution
+     * @param callback
+     */
+    @Async
+    @Override
     public void nodeDelete(String vdc, String nodeName, String token, Task task, String callback) {
         try {
             nodeManager.nodeDelete(vdc, nodeName, token);
@@ -82,24 +97,26 @@ public class NodeAsyncManagerImpl implements NodeAsyncManager {
      * Update the task with necessary information when the task is success.
      */
     private void updateSuccessTask(Task task, String vdc, String chefClientname) {
-        String piResource = MessageFormat.format(SDC_MANAGER_URL+CHEF_NODE_BASE_PATH, vdc,
-                chefClientname); // the product
-        task.setResult(new TaskReference(piResource));
+        task.setResult(new TaskReference(getTaskUrl(vdc, chefClientname)));
         task.setEndTime(new Date());
         task.setStatus(TaskStates.SUCCESS);
         taskManager.updateTask(task);
     }
 
     /*
-     * Update the task with necessary information when the task is wrong and the product instance exists in the system.
+     * Update the task with necessary information when the task is wrong and
+     * the product instance exists in the system.
      */
     private void updateErrorTask(String vdc, String chefClientname, Task task, String message, Throwable t) {
-        String piResource = MessageFormat.format(SDC_MANAGER_URL+CHEF_NODE_BASE_PATH, vdc,
-                chefClientname); // the product
-        task.setResult(new TaskReference(piResource));
+
+        task.setResult(new TaskReference(getTaskUrl(vdc, chefClientname)));
         updateErrorTask(task, message, t);
     }
 
+    private String getTaskUrl(String vdc, String chefClientName) {
+        return MessageFormat.format(systemPropertiesProvider.getProperty(SDC_MANAGER_URL)
+            + CHEF_NODE_BASE_PATH, chefClientName, vdc);
+    }
     /*
      * Update the task with necessary information when the task is wrong.
      */
@@ -124,11 +141,19 @@ public class NodeAsyncManagerImpl implements NodeAsyncManager {
     // ////////// I.O.C ////////////
 
     /**
-     * @param chefClientManager
-     *            the chefClientManager to set
+     * @param nodeManager
+     *            the nodeManager to set
      */
     public void setNodeManager(NodeManager nodeManager) {
         this.nodeManager = nodeManager;
+    }
+
+    /**
+     * It sets the system properties provider.
+     * @param systemPropertiesProvider
+     */
+    public void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
     }
 
     /**

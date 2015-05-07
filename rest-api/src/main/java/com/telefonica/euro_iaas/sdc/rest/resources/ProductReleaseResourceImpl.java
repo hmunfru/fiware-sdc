@@ -34,12 +34,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.telefonica.euro_iaas.commons.dao.AlreadyExistsEntityException;
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
-import com.telefonica.euro_iaas.commons.dao.InvalidEntityException;
 import com.telefonica.euro_iaas.sdc.exception.AlreadyExistsProductReleaseException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidProductReleaseException;
 import com.telefonica.euro_iaas.sdc.exception.ProductReleaseNotFoundException;
@@ -48,12 +44,14 @@ import com.telefonica.euro_iaas.sdc.manager.ProductManager;
 import com.telefonica.euro_iaas.sdc.manager.ProductReleaseManager;
 import com.telefonica.euro_iaas.sdc.model.Product;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
-import com.telefonica.euro_iaas.sdc.model.dto.PaasManagerUser;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
 import com.telefonica.euro_iaas.sdc.rest.exception.APIException;
 import com.telefonica.euro_iaas.sdc.rest.validation.GeneralResourceValidator;
 import com.telefonica.euro_iaas.sdc.rest.validation.ProductResourceValidator;
+import com.telefonica.fiware.commons.dao.AlreadyExistsEntityException;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.dao.InvalidEntityException;
 
 /**
  * @author jesus.movilla
@@ -165,11 +163,7 @@ public class ProductReleaseResourceImpl implements ProductReleaseResource {
             return productReleaseManager.load(product, version);
         } catch (EntityNotFoundException e) {
             log.warning("EntityNotFoundException: " + e.getMessage());
-            throw new APIException(new EntityNotFoundException(ProductRelease.class, pName + "-" + version, e));// TODO
-                                                                                                                // Auto-generated
-                                                                                                                // catch
-                                                                                                                // block
-
+            throw new APIException(new EntityNotFoundException(ProductRelease.class, pName + "-" + version, e));
         }
     }
 
@@ -208,10 +202,14 @@ public class ProductReleaseResourceImpl implements ProductReleaseResource {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.telefonica.euro_iaas.sdc.rest.resources.ProductReleaseResource# findTransitable(java.lang.String,
-     * java.lang.String)
+    /**
+     * It obtains the transsitable version.
+     * 
+     * @param pName
+     * @param version
+     *            the product version
+     * @return
+     * @throws APIException
      */
     @Override
     public List<ProductRelease> findTransitable(String pName, String version) throws APIException {
@@ -250,7 +248,4 @@ public class ProductReleaseResourceImpl implements ProductReleaseResource {
         this.productManager = productManager;
     }
 
-    public PaasManagerUser getCredentials() {
-        return (PaasManagerUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
 }

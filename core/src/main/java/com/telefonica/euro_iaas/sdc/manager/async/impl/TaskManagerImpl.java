@@ -29,8 +29,8 @@ import static com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider.SDC_MAN
 import java.text.MessageFormat;
 import java.util.List;
 
-import com.telefonica.euro_iaas.commons.dao.AlreadyExistsEntityException;
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.dao.AlreadyExistsEntityException;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
 import com.telefonica.euro_iaas.sdc.dao.TaskDao;
 import com.telefonica.euro_iaas.sdc.exception.SdcRuntimeException;
 import com.telefonica.euro_iaas.sdc.manager.async.TaskManager;
@@ -57,10 +57,7 @@ public class TaskManagerImpl implements TaskManager {
     public Task createTask(Task task) {
         try {
             task = taskDao.create(task);
-            String taskId = Long.valueOf(task.getId()).toString().replace(".", "");
-            task.setHref(MessageFormat.format(systemPropertiesProvider.getProperty(SDC_MANAGER_URL)+ Configuration.TASK_BASE_PATH, Long.valueOf(task.getId())
-                    .toString(), task.getVdc()));
-
+            task.setHref(getHrefUrl(task));
             return task;
         } catch (AlreadyExistsEntityException e) {
             throw new SdcRuntimeException(e);
@@ -73,8 +70,7 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public Task updateTask(Task task) {
         task = taskDao.update(task);
-        task.setHref(MessageFormat.format(systemPropertiesProvider.getProperty(SDC_MANAGER_URL)+ Configuration.TASK_BASE_PATH, Long.valueOf(task.getId())
-                .toString(), task.getVdc()));
+        task.setHref(getHrefUrl(task));
         return task;
     }
 
@@ -84,20 +80,22 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public Task load(Long id) throws EntityNotFoundException {
         Task task = taskDao.load(id);
-        task.setHref(MessageFormat.format(systemPropertiesProvider.getProperty(SDC_MANAGER_URL)+ Configuration.TASK_BASE_PATH, Long.valueOf(task.getId())
-                .toString(), task.getVdc()));
+        task.setHref(getHrefUrl(task));
         return task;
     }
 
+    private String getHrefUrl (Task task) {
+        return MessageFormat.format(systemPropertiesProvider.getProperty(SDC_MANAGER_URL) +
+            Configuration.TASK_BASE_PATH, Long.valueOf(task.getId()).toString(), task.getVdc());
+    }
     /**
      * {@inheritDoc}
      */
     @Override
     public List<Task> findByCriteria(TaskSearchCriteria criteria) {
         List<Task> tasks = taskDao.findByCriteria(criteria);
-        String taskUrl = systemPropertiesProvider.getProperty(SDC_MANAGER_URL)+ Configuration.TASK_BASE_PATH;
         for (Task task : tasks) {
-            task.setHref(MessageFormat.format(taskUrl, Long.valueOf(task.getId()).toString(), task.getVdc()));
+            task.setHref(getHrefUrl(task));
         }
         return tasks;
     }

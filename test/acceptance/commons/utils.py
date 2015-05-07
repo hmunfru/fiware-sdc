@@ -1,4 +1,26 @@
-__author__ = 'arobres'
+# -*- coding: utf-8 -*-
+# Copyright 2014 Telefonica Investigación y Desarrollo, S.A.U
+#
+# This file is part of FI-WARE project.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+#
+# You may obtain a copy of the License at:
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# For those usages not covered by the Apache version 2.0 License please
+# contact with opensource@tid.es
+
+__author__ = 'arobres, jfernandez'
 
 import xmldict
 import xmltodict
@@ -10,6 +32,19 @@ from constants import *
 from lxml import etree
 from commons.fabric_utils import execute_file_exist
 from configuration import WAIT_FOR_OPERATION, WAIT_FOR_INSTALLATION
+
+
+def __set_none_as_empty_value__(python_dict_element):
+    """ Replace all None values of a dict by an empty value ""
+    :param python_dict_element: Dict to be analyzed. Will be replaced itself.
+    :return: None
+    """
+    for element in python_dict_element:
+        if python_dict_element[element] is None:
+            python_dict_element.update({element: ''})
+        elif isinstance(element, dict):
+            __set_none_as_empty_value__(element)
+
 
 def dict_to_xml(dict_to_convert):
 
@@ -23,10 +58,20 @@ def xml_to_dict(xml_to_convert):
 
 def xml_to_dict_attr(xml_to_convert):
 
-    return xmltodict.parse(xml_to_convert)
+    return xmltodict.parse(xml_to_convert, attr_prefix='')
 
 
-def response_body_to_dict(http_response, accept_content_type, with_attributes=False, xml_root_element_name=None):
+def response_body_to_dict(http_response, accept_content_type, with_attributes=False, xml_root_element_name=None,
+                          is_list=False):
+    """
+    Method to convert a XML o JSON response in a Python dict
+    :param http_response: 'Requests (lib)' response
+    :param accept_content_type: Accept header value
+    :param with_attributes: For XML requests. If True, XML attributes will be processed
+    :param xml_root_element_name: For XML requests. XML root element in response.
+    :param is_list: For XML requests. If response is a list, a True value will delete list node name
+    :return: Python dict with response.
+    """
     if ACCEPT_HEADER_JSON in accept_content_type:
         try:
             return http_response.json()
@@ -38,7 +83,14 @@ def response_body_to_dict(http_response, accept_content_type, with_attributes=Fa
         else:
             assert xml_root_element_name is not None,\
                 "xml_root_element_name is a mandatory param when body is in XML and attributes are not considered"
-            return xml_to_dict(http_response.content)[xml_root_element_name]
+            response_body = xml_to_dict(http_response.content)[xml_root_element_name]
+            if response_body is not None:
+                __set_none_as_empty_value__(response_body)
+
+            if is_list and response_body is not None:
+                response_body = response_body.popitem()[1]
+
+            return response_body
 
 
 def body_model_to_body_request(body_model, content_type, body_model_root_element=None):
@@ -98,6 +150,17 @@ def delete_keys_when_value_is_none(dict_del):
     return dict_del
 
 
+def replace_none_value_metadata_to_empty_string(list_of_metadatas):
+    """
+    In a metadata list, replace None value by empty string
+    :param list_of_metadatas:
+    :return:
+    """
+    for metadata in list_of_metadatas:
+        if metadata['value'] is None:
+            metadata['value'] = ''
+
+
 def wait_for_task_finished(vdc_id, task_id, seconds=WAIT_FOR_OPERATION, status_to_be_finished=None, headers=None):
 
     rest_utils = RestUtils()
@@ -107,15 +170,18 @@ def wait_for_task_finished(vdc_id, task_id, seconds=WAIT_FOR_OPERATION, status_t
         response = rest_utils.retrieve_task(headers=headers, vdc_id=vdc_id, task_id=task_id)
         response_body = response_body_to_dict(response, headers[ACCEPT_HEADER], with_attributes=True,
                                               xml_root_element_name=TASK)
-        status = response_body["@"+TASK_STATUS]
-        print 'Waiting for task status. TIME: {}\n STATUS: {}'.format(count, status)
+        status = response_body[TASK_STATUS]
+        print '[TASK] Waiting for task status. CHECK: {} - STATUS: {}'.format(count, status)
 
         if status == status_to_be_finished:
             correct_status = True
             break
         elif status != TASK_STATUS_VALUE_RUNNING:
             break
-        time.sleep(1)
+        time.sleep(5)
+
+    if correct_status is False:
+        print "[TASK] Response body:", response_body
 
     return correct_status
 
@@ -185,17 +251,30 @@ def generate_product_instance_id(vm_fqn, product_name, product_version):
     return "{}_{}_{}".format(vm_fqn, product_name, product_version)
 
 
-def generate_content_installed_by_product(product_name, product_version, instance_attributes):
+def _replace_ipall_att_value(attribute, installator):
+    """
+    If installator is Puppet, list of values (IPALL type) is installed by our testing manifest without ",".
+    This method return the list without that character to validate a successful installation
+    :param attribute: Instance attribute to be processed
+    :return: If installator is Puppet, list of values when attribute type is IPALL will be processed
+    to delete the "," character
+    """
+    if installator == 'puppet' and ATTRIBUTE_TYPE in attribute and attribute[ATTRIBUTE_TYPE] == ATTRIBUTE_TYPE_IPALL:
+        return attribute[VALUE].replace(",", "")
+    else:
+        return attribute[VALUE]
+
+
+def generate_content_installed_by_product(product_name, product_version, instance_attributes, installator='chef'):
 
     att_01 = PRODUCT_INSTALLATION_ATT1_DEFAULT
     att_02 = PRODUCT_INSTALLATION_ATT2_DEFAULT
 
     if instance_attributes is not None or len(instance_attributes) != 0:
         if len(instance_attributes) >= 1:
-            att_01 = instance_attributes[0][VALUE]
+            att_01 = _replace_ipall_att_value(instance_attributes[0], installator)
 
         if len(instance_attributes) >= 2:
-            att_02 = instance_attributes[1][VALUE]
-
+            att_02 = _replace_ipall_att_value(instance_attributes[1], installator)
     return PRODUCT_INSTALLATION_FILE_CONTENT.format(product_name=product_name, product_version=product_version,
                                                     att_01=att_01, att_02=att_02)

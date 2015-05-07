@@ -30,13 +30,6 @@
                 <include>*.sh</include>
             </includes>
         </fileSet>
-		<fileSet>
-            <directory>${project.basedir}/src/assembly/rpm</directory>
-            <outputDirectory>/rpm</outputDirectory>
-            <includes>
-                <include>*.py</include>
-            </includes>
-        </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/assembly/jetty/bin</directory>
             <outputDirectory>/bin</outputDirectory>
@@ -52,7 +45,16 @@
                 <include>*.war</include>
             </includes>
         </fileSet>
-
+		<fileSet>
+            <directory>${project.basedir}/migrations/src/main/resources</directory>
+            <outputDirectory>/resources</outputDirectory>
+            <includes>
+                <include>db-initial.sql</include>
+                <include>db-changelog.sql</include>
+            </includes>
+        </fileSet>
+        
+        
         <!-- create emtpy directories -->
         <fileSet>
             <directory>./</directory>

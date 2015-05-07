@@ -25,15 +25,15 @@
 package com.telefonica.euro_iaas.sdc.manager.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.telefonica.euro_iaas.commons.dao.AlreadyExistsEntityException;
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
-import com.telefonica.euro_iaas.commons.dao.InvalidEntityException;
+import com.telefonica.euro_iaas.sdc.dao.MetadataDao;
 import com.telefonica.euro_iaas.sdc.dao.ProductDao;
 import com.telefonica.euro_iaas.sdc.manager.ProductManager;
 import com.telefonica.euro_iaas.sdc.manager.ProductReleaseManager;
@@ -43,17 +43,19 @@ import com.telefonica.euro_iaas.sdc.model.ProductRelease;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductAndReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductSearchCriteria;
+import com.telefonica.fiware.commons.dao.AlreadyExistsEntityException;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.dao.InvalidEntityException;
 import com.xmlsolutions.annotation.UseCase;
 
 /**
  * Default ProductManager implementation.
- * 
- * @author Sergio Arroyo, Jesus M. Movilla
  */
 @UseCase(traceTo = "UC_101", status = "partially implemented")
 public class ProductManagerImpl extends BaseInstallableManager implements ProductManager {
 
     private ProductDao productDao;
+    private MetadataDao metadataDao;
     private ProductReleaseManager productReleaseManager;
     private static Logger log = Logger.getLogger("ProductManagerImpl");
 
@@ -65,35 +67,29 @@ public class ProductManagerImpl extends BaseInstallableManager implements Produc
             log.log(Level.INFO, "Product " + productOut.getName() + " LOADED");
         } catch (EntityNotFoundException e) {
 
-            List<Metadata> metadatas = new ArrayList<Metadata>();
-            metadatas.add(new Metadata("image", "df44f62d-9d66-4dc5-b084-2d6c7bc4cfe4")); // centos6.3_sdc
-            metadatas.add(new Metadata("cookbook_url", ""));
-            metadatas.add(new Metadata("cloud", "yes"));
-            metadatas.add(new Metadata("installator", "chef"));
-            metadatas.add(new Metadata("open_ports", "80 22"));
-            metadatas.add(new Metadata("tenant_id", tenantId));
+            Map<String, Metadata> productMetadataMap = new HashMap();
 
-            List<Metadata> defaultmetadatas = new ArrayList<Metadata>();
-            defaultmetadatas.add(new Metadata("image", "df44f62d-9d66-4dc5-b084-2d6c7bc4cfe4"));
-            defaultmetadatas.add(new Metadata("cookbook_url", ""));
-            defaultmetadatas.add(new Metadata("cloud", "yes"));
-            defaultmetadatas.add(new Metadata("installator", "chef"));
-            defaultmetadatas.add(new Metadata("open_ports", "80 22"));
-            defaultmetadatas.add(new Metadata("tenant_id", tenantId));
+            List<Metadata> productMetadatas = product.getMetadatas();
 
-            for (Metadata external_metadata : product.getMetadatas()) {
-                boolean defaultmetadata = false;
-                for (Metadata default_metadata : defaultmetadatas) {
-                    if (external_metadata.getKey().equals(default_metadata.getKey())) {
-                        metadatas.get(metadatas.indexOf(default_metadata)).setValue(external_metadata.getValue());
-                        defaultmetadata = true;
-                    }
-                }
-                if (!defaultmetadata) {
-                    metadatas.add(external_metadata);
+            for (Metadata metadata : productMetadatas) {
+                productMetadataMap.put(metadata.getKey(), metadata);
+            }
+
+            List<Metadata> defaultMetadatas = new ArrayList<Metadata>();
+            defaultMetadatas.add(new Metadata("image", ""));
+            defaultMetadatas.add(new Metadata("cookbook_url", ""));
+            defaultMetadatas.add(new Metadata("cloud", "yes"));
+            defaultMetadatas.add(new Metadata("installator", "chef"));
+            defaultMetadatas.add(new Metadata("open_ports", "80 22"));
+            defaultMetadatas.add(new Metadata("tenant_id", tenantId));
+
+            for (Metadata metadata : defaultMetadatas) {
+
+                if (!productMetadataMap.containsKey(metadata.getKey())) {
+                    productMetadatas.add(metadata);
                 }
             }
-            product.setMetadatas(metadatas);
+
             productOut = productDao.create(product);
         }
         return productOut;
@@ -137,7 +133,7 @@ public class ProductManagerImpl extends BaseInstallableManager implements Produc
                 List<ProductRelease> productReleaseList = productReleaseManager.findReleasesByCriteria(prCriteria);
 
                 for (ProductRelease pr : productReleaseList) {
-                    
+
                     ProductAndReleaseDto productAndRelease = new ProductAndReleaseDto();
                     productAndRelease.setProduct(p);
                     productAndRelease.setVersion(pr.getVersion());
@@ -151,26 +147,81 @@ public class ProductManagerImpl extends BaseInstallableManager implements Produc
     }
 
     /**
+     * Load metadata by productName and metadataName.
+     * 
+     * @param productName
+     * @param metadataName
+     * @return
+     * @throws EntityNotFoundException
+     */
+    @Override
+    public Metadata loadMetadata(String productName, String metadataName) throws EntityNotFoundException {
+
+        Product product;
+        Metadata metadata;
+        try {
+            product = this.load(productName);
+        } catch (Exception e) {
+            log.warning("The product: " + productName + " does not exist" + e.getMessage());
+            throw new EntityNotFoundException(Product.class, productName, null);
+        }
+
+        try {
+            metadata = product.getMetadata(metadataName);
+            metadata = metadataDao.loadById(metadata.getId());
+        } catch (Exception e) {
+            log.warning("Exception: metadata not found or wrong" + metadataName);
+            throw new EntityNotFoundException(Metadata.class, "Metadata not found : " + metadataName, null);
+        }
+        return metadata;
+    }
+
+    /**
+     * Update metadata.
+     * 
+     * @param updatedMetadata
+     */
+    @Override
+    public void updateMetadata(Metadata updatedMetadata) {
+        metadataDao.merge(updatedMetadata);
+
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public Product load(String name) throws EntityNotFoundException {
         return productDao.load(name);
     }
-    
-   
+
     public boolean exist(String name) {
         try {
-			load(name);
-			return true;
-		} catch (EntityNotFoundException e) {
-			return false;
-		}
+            load(name);
+            return true;
+        } catch (EntityNotFoundException e) {
+            return false;
+        }
     }
 
+    /**
+     * It deletes the product in DB.
+     * 
+     * @param product
+     */
     @Override
     public void delete(Product product) {
         productDao.remove(product);
+    }
+
+    /**
+     * It updates the product in DB.
+     * 
+     * @param product
+     */
+    @Override
+    public void update(Product product) {
+        productDao.update(product);
     }
 
     /**
@@ -185,4 +236,11 @@ public class ProductManagerImpl extends BaseInstallableManager implements Produc
         this.productReleaseManager = productReleaseManager;
     }
 
+    public MetadataDao getMetadataDao() {
+        return metadataDao;
+    }
+
+    public void setMetadataDao(MetadataDao metadataDao) {
+        this.metadataDao = metadataDao;
+    }
 }

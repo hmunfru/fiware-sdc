@@ -29,10 +29,9 @@ import java.util.List;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.MDC;
 
 import com.telefonica.euro_iaas.sdc.client.services.ProductInstanceService;
 import com.telefonica.euro_iaas.sdc.client.services.SdcClientConfig;
@@ -58,9 +57,17 @@ public abstract class AbstractInstallableService extends AbstractBaseService {
      */
     public Task upgrade(String vdc, String name, String version, String callback, String token) {
         String url = getBaseHost() + MessageFormat.format(upgradePath, vdc, name, version);
-        Invocation.Builder builder = createWebResource(url, token, vdc);
-        builder = addCallback(builder, callback);
-        return builder.put(Entity.json(null), Task.class);
+        Response response = null;
+        try {
+            Invocation.Builder builder = createWebResource(url, token, vdc);
+            builder = addCallback(builder, callback);
+            response = builder.put(Entity.json(null));
+            return response.readEntity(Task.class);
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
     /**
@@ -69,12 +76,20 @@ public abstract class AbstractInstallableService extends AbstractBaseService {
      */
     public Task configure(String vdc, String name, String callback, List<Attribute> arguments, String token) {
         String url = getBaseHost() + MessageFormat.format(configPath, vdc, name);
-        Invocation.Builder builder = createWebResource(url, token, vdc);
-        builder = addCallback(builder, callback);
-        Attributes attributes = new Attributes();
-        attributes.addAll(arguments);
-        // create Attributes object because Jersey can not write List<Attribute>
-        return builder.put(Entity.entity(attributes, getType())).readEntity(Task.class);
+        Response response = null;
+        try {
+            Invocation.Builder builder = createWebResource(url, token, vdc);
+            builder = addCallback(builder, callback);
+            Attributes attributes = new Attributes();
+            attributes.addAll(arguments);
+            // create Attributes object because Jersey can not write List<Attribute>
+            response = builder.put(Entity.entity(attributes, getType()));
+            return response.readEntity(Task.class);
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
     /**
@@ -83,9 +98,17 @@ public abstract class AbstractInstallableService extends AbstractBaseService {
      */
     public Task uninstall(String vdc, String name, String callback, String token) {
         String url = getBaseHost() + MessageFormat.format(uninstallPath, vdc, name);
-        Invocation.Builder builder = createWebResource(url, token, vdc);
-        builder = addCallback(builder, callback);
-        return builder.delete(Task.class);
+        Response response = null;
+        try {
+            Invocation.Builder builder = createWebResource(url, token, vdc);
+            builder = addCallback(builder, callback);
+            response = builder.delete();
+            return response.readEntity(Task.class);
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
     protected Invocation.Builder addCallback(Invocation.Builder resource, String callback) {
@@ -140,17 +163,4 @@ public abstract class AbstractInstallableService extends AbstractBaseService {
         this.uninstallPath = uninstallPath;
     }
 
-    protected Invocation.Builder createWebResource(String url, String token, String tenant) {
-        WebTarget webResource = getClient().target(url);
-        Invocation.Builder builder = webResource.request(getType()).accept(getType());
-        builder.header("X-Auth-Token", token);
-        builder.header("Tenant-Id", tenant);
-
-        String txId = MDC.get("txId");
-        if (txId != null) {
-            builder.header("txId", tenant);
-        }
-        return builder;
-
-    }
 }

@@ -31,15 +31,16 @@ import java.util.logging.Logger;
 
 import org.glassfish.jersey.media.multipart.MultiPart;
 
-import com.telefonica.euro_iaas.commons.dao.AlreadyExistsEntityException;
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
-import com.telefonica.euro_iaas.commons.dao.InvalidEntityException;
+import com.telefonica.fiware.commons.dao.AlreadyExistsEntityException;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.dao.InvalidEntityException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidMultiPartRequestException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidNameException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidProductException;
 import com.telefonica.euro_iaas.sdc.exception.InvalidProductReleaseUpdateRequestException;
 import com.telefonica.euro_iaas.sdc.manager.ProductManager;
 import com.telefonica.euro_iaas.sdc.manager.ProductReleaseManager;
+import com.telefonica.euro_iaas.sdc.model.Attribute;
 import com.telefonica.euro_iaas.sdc.model.Metadata;
 import com.telefonica.euro_iaas.sdc.model.Product;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
@@ -48,12 +49,14 @@ import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductSearchCriteria;
 import com.telefonica.euro_iaas.sdc.rest.exception.APIException;
+import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
 
 public class ProductResourceValidatorImpl extends MultipartValidator implements ProductResourceValidator {
 
     private GeneralResourceValidator generalValidator;
     private ProductManager productManager;
     private ProductReleaseManager productReleaseManager;
+    private SystemPropertiesProvider systemPropertiesProvider;
 
     private static Logger log = Logger.getLogger("ProductResourceValidatorImpl");
 
@@ -106,6 +109,7 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
         } catch (EntityNotFoundException e1) {
             log.warning("EntityNotFoundException: " + e1.getMessage());
         }
+        
     }
 
     public void validateLoad(ReleaseDto releaseDto) throws EntityNotFoundException {
@@ -129,12 +133,16 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
 
     }
 
-    public void validateInsert(Product product) throws InvalidEntityException, AlreadyExistsEntityException {
+    public void validateInsert(Product product) throws InvalidEntityException, AlreadyExistsEntityException,
+            InvalidProductException {
 
         if (productManager.exist(product.getName())) {
             String mens = "Entity already exist : " + product.getName();
             log.warning(mens);
             throw new AlreadyExistsEntityException(Product.class, new Exception(mens));
+        }
+        if (product.getAttributes() != null) {
+            validateAttributesType(product.getAttributes());
         }
 
         commonValidation(product);
@@ -154,6 +162,32 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
     	}
     }
 
+    private void validateAttributesType(List<Attribute> attributes) throws InvalidProductException {
+        String msg = "Attribute type is incorrect.";
+        for (Attribute att : attributes) {
+            if (att.getType() == null) {
+                log.warning(msg + " Adding Plain as default value.");
+                att.setType("Plain");
+            }
+
+            String availableTypes = systemPropertiesProvider
+                    .getProperty(SystemPropertiesProvider.AVAILABLE_ATTRIBUTE_TYPES);
+
+            StringTokenizer st2 = new StringTokenizer(availableTypes, "|");
+            boolean error = true;
+            while (st2.hasMoreElements()) {
+                if (att.getType().equals(st2.nextElement())) {
+                    error = false;
+                    break;
+                }
+            }
+            if (error) {
+                throw new InvalidProductException(msg);
+            }
+        }
+
+    }
+
     private void commonValidation(Product product) throws InvalidEntityException {
         try {
             generalValidator.validateName(product.getName());
@@ -169,15 +203,21 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
     }
 
     private void validateMetadata(List<Metadata> metadatas) throws InvalidProductException {
-        for (int i = 0; i < metadatas.size(); i++) {
+    	if (areMetadataDuplicated(metadatas)) {
+            String msg = "There are some metadatas duplicated in the product payload";
+            log.warning (msg);
+            throw new InvalidProductException(msg);
+        }
+    	
+    	for (int i = 0; i < metadatas.size(); i++) {
             Metadata metadata = metadatas.get(i);
 
-            if (metadata.getKey().equals("open_ports")) {
+            if (metadata.getKey().equals("open_ports") ||
+                metadata.getKey().equals("open_ports_udp")) {
                 List<String> ports = getFields((String) metadata.getValue());
                 for (String port : ports) {
                     checkPortMetadata(port);
                 }
-
             } else if (metadata.getKey().equals("installator")) {
                 if (!(metadata.getValue().equals("chef")) && !(metadata.getValue().equals("puppet"))) {
                     String msg = "Metadata " + metadata.getValue() + " MUST BE \"chef\" or \"puppet\"";
@@ -185,22 +225,29 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
                 }
             } else if (metadata.getKey().equals("dependencies")) {
                 checkDependence(metadata.getValue());
-            } else if (metadata.getKey().equals("public")) {
+            } else if (metadata.getKey().equals("public") ||
+                metadata.getKey().equals("cloud")) {
                 if (!(metadata.getValue().equals("no")) && !(metadata.getValue().equals("yes"))) {
                     String msg = "Metadata " + metadata.getValue() + " MUST BE \"yes\" or \"not\"";
                     throw new InvalidProductException(msg);
                 }
-            } else if (metadata.getKey().equals("cloud")) {
-                if (!(metadata.getValue().equals("no")) && !(metadata.getValue().equals("yes"))) {
-                    String msg = "Metadata " + metadata.getValue() + " MUST BE \"yes\" or \"not\"";
-                    throw new InvalidProductException(msg);
-                }
-            }
+            } 
         }
 
     }
 
     private void checkPortMetadata(String port) throws InvalidProductException {
+
+        if (port.contains("-")) {
+            checkPort(port.substring(0, port.indexOf("-")));
+            checkPort(port.substring( port.indexOf("-")+1, port.length()));
+        }
+        else {
+            checkPort(port);
+        }
+    }
+
+    private void checkPort(String port) throws InvalidProductException{
         int openPortValue;
         try {
             openPortValue = Integer.parseInt(port);
@@ -209,7 +256,7 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
             throw new InvalidProductException(msg);
         }
 
-        if ((openPortValue < 0) && (openPortValue > 65535)) {
+        if ((openPortValue < 0) || (openPortValue > 65535)) {
             String msg = "The open_ports value is not in the interval [0-65535]";
             throw new InvalidProductException(msg);
         }
@@ -240,6 +287,20 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
 
     }
 
+    private boolean areMetadataDuplicated (List<Metadata> metadatas) {
+    	List <Metadata> support_metadatas = new ArrayList<Metadata>();
+    	
+    	for (int i=0; i < metadatas.size(); i++) {
+    		Metadata metadata = metadatas.get(i);
+    		
+    		for (int j=0; j < support_metadatas.size(); j++) {
+    			if (metadata.getKey().equals(support_metadatas.get(j).getKey()))
+    				return true;
+    		}
+    		support_metadatas.add(metadata);  		
+    	}
+    	return false;
+    }
     /**
      * @param generalValidator
      *            the generalValidator to set
@@ -254,6 +315,10 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
 
     public void setProductReleaseManager(ProductReleaseManager productReleaseManager) {
         this.productReleaseManager = productReleaseManager;
+    }
+
+    public void setSystemPropertiesProvider(SystemPropertiesProvider systemPropertiesProvider) {
+        this.systemPropertiesProvider = systemPropertiesProvider;
     }
 
 }

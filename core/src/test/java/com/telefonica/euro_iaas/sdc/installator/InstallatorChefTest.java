@@ -26,33 +26,30 @@ package com.telefonica.euro_iaas.sdc.installator;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import net.sf.json.JSONObject;
-
-import org.apache.http.client.methods.HttpUriRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
 import com.telefonica.euro_iaas.sdc.dao.ChefNodeDao;
 import com.telefonica.euro_iaas.sdc.exception.CanNotCallChefException;
 import com.telefonica.euro_iaas.sdc.exception.InstallatorException;
 import com.telefonica.euro_iaas.sdc.exception.NodeExecutionException;
 import com.telefonica.euro_iaas.sdc.installator.impl.InstallatorChefImpl;
-import com.telefonica.euro_iaas.sdc.installator.impl.InstallatorPuppetImpl;
-import com.telefonica.euro_iaas.sdc.keystoneutils.OpenStackRegion;
 import com.telefonica.euro_iaas.sdc.model.Attribute;
 import com.telefonica.euro_iaas.sdc.model.InstallableInstance.Status;
 import com.telefonica.euro_iaas.sdc.model.Metadata;
@@ -78,129 +75,157 @@ public class InstallatorChefTest {
     private ChefNodeDao chefNodeDao;
     private SystemPropertiesProvider propertiesProvider;
     private SDCClientUtils sdcClientUtils;
-    
-    
+    private ChefNode chefNode;
+
     private String jsonFilePath = "src/test/resources/chefNodeOhaiTimeDate.js";
-    private String jsonFromFile; 
-   
+    private String jsonFromFile = "{\"name\":\"test\"}";
+
     private String initProbeRecipe = "probe::0.1_init";
     private String installProbeRecipe = "probe::0.1_install";
-    private String installRecipe ="Product::server";
-    private String uninstallRecipe ="Product::uninstall-server";
-    private String deployacrecipe ="Product::deployac";
-    private String configurerecipe ="Product::configure";
+    private String installRecipe = "Product::server";
+    private String uninstallRecipe = "Product::uninstall-server";
+    private String deployacrecipe = "Product::deployac";
+    private String configurerecipe = "Product::configure";
     private String undeployacrecipe = "Product::undeployac";
-    
+
     @Before
-    public void setup() throws CanNotCallChefException, EntityNotFoundException, IOException, NodeExecutionException {
+    public void setup() throws CanNotCallChefException, EntityNotFoundException, IOException, NodeExecutionException,
+            InterruptedException {
         os = new OS("os1", "1", "os1 description", "v1");
         host.setOsType(os.getOsType());
-        
+
         product = new Product("Product", "description");
-        Metadata metadata=new Metadata("installator", "chef");
-        List<Metadata>metadatas = new ArrayList<Metadata>();
+        Metadata metadata = new Metadata("installator", "chef");
+        List<Metadata> metadatas = new ArrayList<Metadata>();
         metadatas.add(metadata);
         product.setMetadatas(metadatas);
         productRelease = new ProductRelease();
         productRelease.setProduct(product);
-        
+
         productInstance = new ProductInstance(productRelease, Status.INSTALLED, host, "vdc");
         productInstance.setProductRelease(productRelease);
-        
+
         sdcClientUtils = mock(SDCClientUtils.class);
         sdcClientUtils.execute(host);
-        
-        //jsonFromFile = getFile(jsonFilePath);
-        ChefNode chefNode = new ChefNode();
-        chefNode.fromJson(JSONObject.fromObject(jsonFromFile));
+
+        // jsonFromFile = getFile(jsonFilePath);
+        chefNode = new ChefNode();
+        chefNode.setName("a");
+        // chefNode.fromJson(JSONObject.fromObject(jsonFromFile));
 
         chefNode.addAttribute("dd", "dd", "dd");
         chefNode.addAttribute(installRecipe, "dd", "dd");
-        chefNode.addAttribute("action","action_probe", "init");
-        //chefNode.addRecipe(initProbeRecipe);
+        chefNode.addAttribute("action", "action_probe", "init");
+        chefNode.addAutomaticAttritube("platform", "value");
+        chefNode.addAutomaticAttritube("platform_version", "value");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss Z", Locale.US);
+        Date future = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(future);
+        calendar.set(Calendar.HOUR_OF_DAY, 14);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.YEAR, 2020);
+        future = calendar.getTime();
+
+        chefNode.addAutomaticAttritube("ohai_time", df.format(future));
+        // chefNode.addRecipe(initProbeRecipe);
         chefNode.addRecipe(installRecipe);
-        //chefNode.addRecipe(installProbeRecipe);
-        
+        // chefNode.addRecipe(installProbeRecipe);
+
         chefNodeDao = mock(ChefNodeDao.class);
-        when(chefNodeDao.loadNode(any(String.class),any(String.class))).thenReturn(chefNode);
-        when(chefNodeDao.updateNode((ChefNode) anyObject(),any(String.class))).thenReturn(chefNode);
-        when(chefNodeDao.loadNodeFromHostname(any(String.class),any(String.class))).thenReturn(chefNode);
-        Mockito.doNothing().when(chefNodeDao).isNodeRegistered(any(String.class),any(String.class)); 
-        
+        when(chefNodeDao.loadNode(any(String.class), any(String.class))).thenReturn(chefNode);
+        when(chefNodeDao.updateNode((ChefNode) anyObject(), any(String.class))).thenReturn(chefNode);
+        when(chefNodeDao.loadNodeFromHostname(any(String.class), any(String.class))).thenReturn(chefNode);
+        Mockito.doNothing().when(chefNodeDao).isNodeRegistered(any(String.class), any(String.class));
+
         recipeNamingGenerator = mock(RecipeNamingGenerator.class);
         when(recipeNamingGenerator.getInstallRecipe(any(ProductInstance.class))).thenReturn(installRecipe);
         when(recipeNamingGenerator.getUninstallRecipe(any(ProductInstance.class))).thenReturn(uninstallRecipe);
         when(recipeNamingGenerator.getDeployArtifactRecipe(any(ProductInstance.class))).thenReturn(deployacrecipe);
         when(recipeNamingGenerator.getConfigureRecipe(any(ProductInstance.class))).thenReturn(configurerecipe);
         when(recipeNamingGenerator.getUnDeployArtifactRecipe(any(ProductInstance.class))).thenReturn(undeployacrecipe);
-        
+
         propertiesProvider = mock(SystemPropertiesProvider.class);
-        
-        installator=new InstallatorChefImpl();
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.INSTALLATION_MAXTIME)).thenReturn("10000");
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.REGISTRATION_MAXTIME)).thenReturn("10000");
+        when(propertiesProvider.getProperty(SystemPropertiesProvider.SDCCLIENT_INSTALLED_IN_NODES)).thenReturn("false");
+
+        installator = spy(new InstallatorChefImpl());
         installator.setRecipeNamingGenerator(recipeNamingGenerator);
         installator.setChefNodeDao(chefNodeDao);
+        installator.setSystemPropertiesProvider(propertiesProvider);
         installator.setPropertiesProvider(propertiesProvider);
         installator.setSdcClientUtils(sdcClientUtils);
-        
-        
+        doNothing().when(installator).sleep(10000);
+
     }
 
-  /*  @Test
-    public void installTest_OK() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "install");
-    }
-    
     @Test
-    public void uninstallTest_OK() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "uninstall");
-    }
-    
-    @Test
-    public void configureTest_OK() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "configure");
-    }
-    
-    @Test
-    public void deployArtifactTest_OK() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "deployArtifact");
-    }
-    
-    @Test
-    public void undeployArtifactTest_OK() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "undeployArtifact");
-    }
-    
-    @Test(expected=InstallatorException.class)
-    public void installTest_fail() throws InstallatorException, NodeExecutionException{
-    
-        installator.callService(productInstance, host, new ArrayList<Attribute>(), "NOT EXISTS");
-        
-    }
-    
-    @Test
-    public void unnstallTest_OK_1() throws InstallatorException, NodeExecutionException{
-        
-        installator.callService(productInstance, "uninstall");
-    }*/
-    
-    private String getFile(String file) throws IOException {
-        File f = new File(file);
-        System.out.println(f.isFile() + " " + f.getAbsolutePath());
+    public void installTest_OK() throws InstallatorException, NodeExecutionException {
 
-        InputStream dd = new FileInputStream(f);
+        installator.callService(productInstance, host, new ArrayList<Attribute>(), "install", "token");
+    }
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(dd));
-        StringBuffer ruleFile = new StringBuffer();
-        String actualString;
+    @Test
+    public void uninstallTest_OK() throws InstallatorException, NodeExecutionException {
+    	
+    	installator.callService(productInstance, host, new ArrayList<Attribute>(), "uninstall", "token");
+    }
 
-        while ((actualString = reader.readLine()) != null) {
-          ruleFile.append(actualString).append("\n");
-        }
-        return ruleFile.toString();
-      }
+    @Test
+    public void configureTest_OK() throws InstallatorException, NodeExecutionException {
+
+        installator.callService(productInstance, host, new ArrayList<Attribute>(), "configure", "token");
+    }
+
+    @Test
+    public void deployArtifactTest_OK() throws InstallatorException, NodeExecutionException {
+
+        installator.callService(productInstance, host, new ArrayList<Attribute>(), "deployArtifact", "token");
+    }
+
+    @Test
+    public void undeployArtifactTest_OK() throws InstallatorException, NodeExecutionException {
+
+        installator.callService(productInstance, host, new ArrayList<Attribute>(), "undeployArtifact", "token");
+    }
+
+    @Test(expected = InstallatorException.class)
+    public void installTest_fail() throws InstallatorException, NodeExecutionException {
+
+        installator.callService(productInstance, host, new ArrayList<Attribute>(), "NOT EXISTS", "token");
+
+    }
+
+    @Test
+    public void unnstallTest_OK_1() throws InstallatorException, NodeExecutionException {
+
+        installator.callService(productInstance, "uninstall", "token");
+    }
+    
+    @Test
+    public void checkRecipeExecution_OK() throws InstallatorException, NodeExecutionException { 
+    	installator.checkRecipeExecution(host, "Product", installRecipe, "token");
+    }
+
+    @Test(expected = NodeExecutionException.class)
+    public void checkRecipeExecution_fail() throws InstallatorException, NodeExecutionException {
+        	
+    	DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss Z", Locale.US);
+        Date past = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(past);
+        calendar.set(Calendar.HOUR_OF_DAY, 14);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.YEAR, 2000);
+        past = calendar.getTime();
+        
+        chefNode.addAutomaticAttritube("ohai_time", df.format(past));
+        
+        installator.checkRecipeExecution(host, "Product", installRecipe, "token");
+    }
 }

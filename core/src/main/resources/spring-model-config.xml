@@ -41,16 +41,27 @@
         <property name="recipeNamingGenerator" ref="recipeNamingGenerator"/>
         <property name="chefNodeDao" ref="chefNodeDao"/>
         <property name="ip2vm" ref="ip2vm"/>
+        <property name="systemPropertiesProvider" ref="systemPropertiesProvider"></property>
     </bean>
 
     <bean id="puppetInstallator" lazy-init="true"
           class="com.telefonica.euro_iaas.sdc.installator.impl.InstallatorPuppetImpl">
         <property name="client" ref="httpClient"/>
+        <property name="httpsClient" ref="httpsClient"/>
         <property name="openStackRegion" ref="openStackRegion"/>
+        <property name="systemPropertiesProvider" ref="systemPropertiesProvider"></property>
     </bean>
 
     <bean id="httpClient" lazy-init="true"
           class="org.apache.http.impl.client.DefaultHttpClient"/>
+
+    <bean id="httpsClient" lazy-init="true"
+          class="com.telefonica.euro_iaas.sdc.util.HttpsClient">
+        <property name="connectionSetup" ref="connectionSetup"/>
+    </bean>
+
+    <bean id="connectionSetup" lazy-init="true"
+          class="com.telefonica.euro_iaas.sdc.util.ConnectionSetup"/>
 
     <bean id="artifactManager" lazy-init="true"
           parent="baseInstallableInstanceManager"
@@ -63,7 +74,6 @@
 
     <!-- CATALOG MANAGER -->
 
-
     <bean id="productReleaseManager" lazy-init="true"
           parent="baseInstallableManager"
           class="com.telefonica.euro_iaas.sdc.manager.impl.ProductReleaseManagerImpl">
@@ -75,6 +85,7 @@
     <bean id="productManager" lazy-init="true" parent="baseInstallableManager"
           class="com.telefonica.euro_iaas.sdc.manager.impl.ProductManagerImpl">
         <property name="productDao" ref="productDao"/>
+        <property name="metadataDao" ref="metadataDao"/>
         <property name="productReleaseManager" ref="productReleaseManager"/>
     </bean>
 
@@ -91,6 +102,7 @@
         <property name="productInstanceDao" ref="productInstanceDao"/>
         <property name="chefNodeDao" ref="chefNodeDao"/>
         <property name="client" ref="httpClient"/>
+        <property name="httpsClient" ref="httpsClient"/>
         <property name="openStackRegion" ref="openStackRegion"/>
 
     </bean>

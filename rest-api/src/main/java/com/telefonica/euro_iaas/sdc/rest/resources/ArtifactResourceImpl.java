@@ -35,10 +35,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.telefonica.euro_iaas.commons.dao.EntityNotFoundException;
 import com.telefonica.euro_iaas.sdc.manager.async.ArtifactAsyncManager;
 import com.telefonica.euro_iaas.sdc.manager.async.ProductInstanceAsyncManager;
 import com.telefonica.euro_iaas.sdc.manager.async.TaskManager;
@@ -50,6 +48,8 @@ import com.telefonica.euro_iaas.sdc.model.Task.TaskStates;
 import com.telefonica.euro_iaas.sdc.model.dto.ArtifactDto;
 import com.telefonica.euro_iaas.sdc.model.dto.PaasManagerUser;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ArtifactSearchCriteria;
+import com.telefonica.euro_iaas.sdc.rest.auth.OpenStackAuthenticationProvider;
+import com.telefonica.fiware.commons.dao.EntityNotFoundException;
 
 /**
  * Default ProductInstanceResource implementation.
@@ -77,8 +77,10 @@ public class ArtifactResourceImpl implements ArtifactResource {
         Artifact artifact = new Artifact(artifactDto.getName(), productInstance.getVdc(), productInstance,
                 artifactDto.getAttributes());
         artifactAsyncManager.deployArtifact(productInstance, artifact, getToken(), task, callback);
+
         log.debug("Task id " + task.getId() + " for Install artifact " + artifactDto.getName() + " in product "
                 + productIntanceName + " vdc " + vdc);
+
         return task;
     }
 
@@ -93,8 +95,10 @@ public class ArtifactResourceImpl implements ArtifactResource {
                 productInstance.getProductRelease().getProduct().getName(), productInstance.getVm().getHostname(),
                 productInstance.getVm().getDomain()), vdc);
         artifactAsyncManager.undeployArtifact(productInstance, artifactName, getToken(), task, callback);
+
         log.debug("Task id " + task.getId() + " for  Uninstall artifact " + artifactName + " in product "
                 + productInstanceName + " vdc " + vdc);
+
         return task;
     }
 
@@ -181,21 +185,13 @@ public class ArtifactResourceImpl implements ArtifactResource {
     }
 
     public String getToken() {
-        PaasManagerUser user = getCredentials();
+        PaasManagerUser user = OpenStackAuthenticationProvider.getCredentials();
         if (user == null) {
             return "";
         } else {
             return user.getToken();
         }
 
-    }
-
-    public PaasManagerUser getCredentials() {
-        try {
-            return (PaasManagerUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }

@@ -57,6 +57,7 @@ Feature: Install product
       | key       | value       | description |
       | att_key_1 | att_value_1 | Att 1       |
       | att_key_2 | att_value_2 | Att 2       |
+      | att_key_3 | att_value_3 | Att 3       |
       When I install the product in the VM
       Then the task is created
       And the product is instantiated
@@ -195,6 +196,77 @@ Feature: Install product
       Then the task is not created
       And I obtain an "400"
       And the product is not instantiated
+
+
+    @release_4_1
+    Scenario Outline: Install a new product with instance attributes (with valid type)
+
+      Given a configuration management with "<cm_tool>"
+      And a created product with name "<product_name>" and release "<release>"
+      And the following instance attributes:
+      | key           | value                   | description         | type   |
+      | custom_att_01 | new_val_att_1           | Testing attributes  | Plain  |
+      | custom_att_02 | 192.168.1.1             | Testing attributes  | IP     |
+      | custom_att_03 | 192.168.1.1,192.168.1.1 | Testing attributes  | IPALL  |
+      And a virtual machine with these parameters:
+      | fqn                | hostname    | ip              |
+	  | qa-test-vm.testing | qa-test-vm  | 111.111.111.111 |
+      When I install the product in the VM
+      Then the task is created
+      And the product is instantiated
+
+      Examples:
+
+      | product_name    | release	| cm_tool 	|
+      | testing_prov_71 | 1.2.3 	| chef  	|
+      | testing_prov_72 | 1.2.3 	| puppet  	|
+
+
+    @release_4_1
+    Scenario Outline: Install a new product with invalid type for instance attributes
+
+      Given a configuration management with "<cm_tool>"
+      And a created product with name "<product_name>" and release "<release>"
+      And the following instance attributes:
+      | key           | value         | description         | type              |
+      | custom_att_01 | new_val_att_1 | Testing attributes  | <attribute_type>  |
+      | custom_att_02 | new_val_att_3 | Testing attributes  | Plain             |
+      And a virtual machine with these parameters:
+      | fqn            | hostname        | ip              |
+	  | qa-test-vm.testing | qa-test-vm  | 111.111.111.111 |
+      When I install the product in the VM
+      Then the task is not created
+      And I obtain an "400"
+      And the product is not instantiated
+
+      Examples:
+
+      | product_name    | release	| cm_tool 	| attribute_type |
+      | testing_prov_81 | 1.2.3 	| chef  	| Plai           |
+      | testing_prov_82 | 1.2.3 	| puppet  	| lalala         |
+      | testing_prov_83 | 1.2.3 	| puppet  	| IPAL           |
+
+
+    @release_4_1
+    Scenario Outline: Install a new product with instance attributes: missing type
+
+      Given a configuration management with "<cm_tool>"
+      And a created product with name "<product_name>" and release "<release>"
+      And the following instance attributes:
+      | key           | value         | description         |
+      | custom_att_01 | missing_type  | Testing attributes  |
+      And a virtual machine with these parameters:
+      | fqn            | hostname        | ip              |
+      | qa-test-vm.testing | qa-test-vm  | 111.111.111.111 |
+      When I install the product in the VM
+      Then the task is created
+      And the product is instantiated
+
+      Examples:
+
+      | product_name    | release	| cm_tool 	|
+      | testing_prov_84 | 1.2.3 	| chef  	|
+      | testing_prov_85 | 1.2.3 	| puppet  	|
 
 
     Scenario Outline: Install a not existent product
