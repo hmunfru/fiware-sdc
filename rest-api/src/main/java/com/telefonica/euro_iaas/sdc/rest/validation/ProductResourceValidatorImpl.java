@@ -149,6 +149,7 @@ public class ProductResourceValidatorImpl extends MultipartValidator implements 
             
     	if (productReleases.size() > 0){
     	     String mes = "The product " + product.getName() + " has releases associated";
+    	     log.warning(mes);
     		 throw new InvalidEntityException(product, new Exception(mes));
     	}
     }
