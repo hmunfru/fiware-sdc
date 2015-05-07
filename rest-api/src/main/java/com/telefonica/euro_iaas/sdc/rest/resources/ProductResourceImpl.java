@@ -228,8 +228,8 @@ public class ProductResourceImpl implements ProductResource {
         	log.warning("EntityNotFoundException: " + e.getMessage());
         	throw new APIException(new EntityNotFoundException(Product.class,name, e));
         } catch (InvalidEntityException e2) {
-        	log.warning("InvalidEntityException: " + e.getMessage());
-        	throw new APIException(new InvalidEntityException(Product.class,name, e));
+        	log.warning("InvalidEntityException: " + e2.getMessage());
+        	throw new APIException(new InvalidEntityException(Product.class, e2));
         }
         productManager.delete(product);
     }
