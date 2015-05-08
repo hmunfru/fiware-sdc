@@ -213,6 +213,10 @@ public class ProductRelease extends InstallableRelease {
         return sb.toString();
     }
 
+    /**
+     * Convert ProductRelease to Dto
+     * @return releaseDto
+     */
     public ReleaseDto toReleaseDto() {
     	return new ReleaseDto(product.getName(), getVersion(), "product");
     }
