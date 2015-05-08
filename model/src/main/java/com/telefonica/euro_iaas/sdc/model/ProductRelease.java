@@ -35,6 +35,8 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
+import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
+
 /**
  * A product release is a concrete version of a given product.
  * 
@@ -211,4 +213,7 @@ public class ProductRelease extends InstallableRelease {
         return sb.toString();
     }
 
+    public ReleaseDto toReleaseDto() {
+    	return new ReleaseDto(product.getName(), getVersion(), "product");
+    }
 }
