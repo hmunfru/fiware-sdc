@@ -86,7 +86,7 @@ public interface ProductInstanceResource extends BaseInstallableInstanceResource
      */
     @GET
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    List<ProductInstance> findAll(@QueryParam("hostname") String hostname, @QueryParam("domain") String domain,
+    List<ProductInstanceDto> findAll(@QueryParam("hostname") String hostname, @QueryParam("domain") String domain,
             @QueryParam("ip") String ip, @QueryParam("fqn") String fqn, @QueryParam("page") Integer page,
             @QueryParam("pageSize") Integer pageSize, @QueryParam("orderBy") String orderBy,
             @QueryParam("orderType") String orderType, @QueryParam("status") Status status,
@@ -102,6 +102,6 @@ public interface ProductInstanceResource extends BaseInstallableInstanceResource
     @GET
     @Path("/{name}")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    ProductInstance load(@PathParam("vdc") String vdc, @PathParam("name") String name);
+    ProductInstanceDto load(@PathParam("vdc") String vdc, @PathParam("name") String name);
 
 }
