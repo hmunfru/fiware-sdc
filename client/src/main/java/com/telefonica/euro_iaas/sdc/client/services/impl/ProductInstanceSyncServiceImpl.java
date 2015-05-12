@@ -65,7 +65,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public ProductInstance upgrade(String vdc, String name, String version, String token) throws MaxTimeWaitingExceedException,
+    public ProductInstanceDto upgrade(String vdc, String name, String version, String token) throws MaxTimeWaitingExceedException,
             InvalidExecutionException {
         Task task = productInstanceService.upgrade(vdc, name, version, null, token);
         return this.waitForTask(task, token);
@@ -75,7 +75,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public ProductInstance configure(String vdc, String name, List<Attribute> arguments, String token)
+    public ProductInstanceDto configure(String vdc, String name, List<Attribute> arguments, String token)
             throws MaxTimeWaitingExceedException, InvalidExecutionException {
         Task task = productInstanceService.configure(vdc, name, null, arguments, token);
         return this.waitForTask(task, token);
@@ -85,7 +85,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
  
-    public ProductInstance uninstall(String vdc, String name, String token) throws MaxTimeWaitingExceedException,
+    public ProductInstanceDto uninstall(String vdc, String name, String token) throws MaxTimeWaitingExceedException,
             InvalidExecutionException {
         Task task = productInstanceService.uninstall(vdc, name, null, token);
         return this.waitForTask(task, token);
@@ -95,7 +95,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public ProductInstance loadUrl(String url, String token, String tenant) throws ResourceNotFoundException {
+    public ProductInstanceDto loadUrl(String url, String token, String tenant) throws ResourceNotFoundException {
         return productInstanceService.loadUrl(url, token, tenant);
     }
 
@@ -103,7 +103,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public ProductInstance install(String vdc, ProductInstanceDto product, String token) throws MaxTimeWaitingExceedException,
+    public ProductInstanceDto install(String vdc, ProductInstanceDto product, String token) throws MaxTimeWaitingExceedException,
             InvalidExecutionException {
     	log.debug ("vdc " + vdc + " product" + product.getProduct().getName());
         Task task = productInstanceService.install(vdc, product, null, token);
@@ -116,7 +116,7 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public List<ProductInstance> findAll(String hostname, String domain, String ip, String fqn, Integer page,
+    public List<ProductInstanceDto> findAll(String hostname, String domain, String ip, String fqn, Integer page,
             Integer pageSize, String orderBy, String orderType, Status status, String vdc, String productName, String token) {
         return productInstanceService.findAll(hostname, domain, ip, fqn, page, pageSize, orderBy, orderType, status,
                 vdc, productName, token);
@@ -126,11 +126,11 @@ public class ProductInstanceSyncServiceImpl implements ProductInstanceSyncServic
      * {@inheritDoc}
      */
 
-    public ProductInstance load(String vdc, String name, String token) throws ResourceNotFoundException {
+    public ProductInstanceDto load(String vdc, String name, String token) throws ResourceNotFoundException {
         return productInstanceService.loadUrl(vdc, name, token);
     }
 
-    private ProductInstance waitForTask(Task task, String token) throws MaxTimeWaitingExceedException, InvalidExecutionException {
+    private ProductInstanceDto waitForTask(Task task, String token) throws MaxTimeWaitingExceedException, InvalidExecutionException {
         task = taskService.waitForTask(task.getHref(), task.getVdc(), token);
         if (!task.getStatus().equals(TaskStates.SUCCESS)) {
             throw new InvalidExecutionException(task.getError().getMessage());

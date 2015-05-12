@@ -80,7 +80,7 @@ public interface BaseInstallableService<T extends InstallableInstance> {
      * @throws ResourceNotFoundException
      *             if the resource does not found
      */
-    T load(String vdc, String name, String token) throws ResourceNotFoundException;
+    //T load(String vdc, String name, String token) throws ResourceNotFoundException;
 
     /**
      * Retrieve the selected application instance.
@@ -91,5 +91,5 @@ public interface BaseInstallableService<T extends InstallableInstance> {
      * @throws ResourceNotFoundException
      *             if the resource does not found
      */
-    T loadUrl(String url, String token, String tenant) throws ResourceNotFoundException;
+    //T loadUrl(String url, String token, String tenant) throws ResourceNotFoundException;
 }

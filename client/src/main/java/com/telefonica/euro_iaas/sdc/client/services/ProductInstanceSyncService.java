@@ -28,8 +28,9 @@ import java.util.List;
 
 import com.telefonica.euro_iaas.sdc.client.exception.InvalidExecutionException;
 import com.telefonica.euro_iaas.sdc.client.exception.MaxTimeWaitingExceedException;
+import com.telefonica.euro_iaas.sdc.client.exception.ResourceNotFoundException;
 import com.telefonica.euro_iaas.sdc.model.InstallableInstance.Status;
-import com.telefonica.euro_iaas.sdc.model.ProductInstance;
+import com.telefonica.euro_iaas.sdc.model.Attribute;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductInstanceDto;
 
 /**
@@ -38,8 +39,8 @@ import com.telefonica.euro_iaas.sdc.model.dto.ProductInstanceDto;
  * @author Sergio Arroyo
  */
 
-public interface ProductInstanceSyncService extends BaseInstallableSyncService<ProductInstance> {
-
+public interface ProductInstanceSyncService {
+	
     /**
      * Install a product in a given host.
      * 
@@ -54,7 +55,7 @@ public interface ProductInstanceSyncService extends BaseInstallableSyncService<P
      * @throws InvalidExecutionException
      *             if the return of the task is not success
      */
-    ProductInstance install(String vdc, ProductInstanceDto product, String token) throws MaxTimeWaitingExceedException,
+    ProductInstanceDto install(String vdc, ProductInstanceDto product, String token) throws MaxTimeWaitingExceedException,
             InvalidExecutionException;
 
     /**
@@ -82,7 +83,80 @@ public interface ProductInstanceSyncService extends BaseInstallableSyncService<P
      *            defines the vdc where the products are installed (<i>not nullable</i>).
      * @return the product instances that match with the criteria.
      */
-    List<ProductInstance> findAll(String hostname, String domain, String ip, String fqn, Integer page,
+    List<ProductInstanceDto> findAll(String hostname, String domain, String ip, String fqn, Integer page,
             Integer pageSize, String orderBy, String orderType, Status status, String vdc, String productName, String token);
+    
+    /**
+     * Retrieve the selected application instance.
+     * 
+     * @param vdc
+     *            the vdc
+     * @param id
+     *            the application id
+     * @return the installable instance.
+     * @throws ResourceNotFoundException
+     *             if the resource does not found
+     */
+    ProductInstanceDto load(String vdc, String name, String token) throws ResourceNotFoundException;
+
+    /**
+     * Retrieve the selected application instance.
+     * 
+     * @param url
+     *            the url where the installable isntance is
+     * @return the installable instance.
+     * @throws ResourceNotFoundException
+     *             if the resource does not found
+     */
+    ProductInstanceDto loadUrl(String url, String token, String tenant) throws ResourceNotFoundException;
+    
+    /**
+     * Upgrade the selected instance version.
+     * 
+     * @param id
+     *            the installable instance id
+     * @param new version the new version to upgrade to async operation will be sent
+     * @return the task
+     * @throws MaxTimeWaitingExceedException
+     *             if the operation spend more time that is allowed
+     * @throws InvalidExecutionException
+     *             if the return of the task is not success
+     */
+     ProductInstanceDto upgrade(String vdc, String name, String version, String token) throws MaxTimeWaitingExceedException, InvalidExecutionException;
+
+    /**
+     * Configure the selected instance.
+     * 
+     * @param id
+     *            the installable instance id
+     * @param arguments
+     *            the configuration properties async operation will be sent
+     * @return the task.
+     * @throws MaxTimeWaitingExceedException
+     *             if the operation spend more time that is allowed
+     * @throws InvalidExecutionException
+     *             if the return of the task is not success
+     */
+     ProductInstanceDto configure(String vdc, String name, List<Attribute> arguments,String token) throws MaxTimeWaitingExceedException,
+            InvalidExecutionException;
+
+    /**
+     * Uninstall a previously installed instance.
+     * 
+     * @param id
+     *            the installable instance id
+     * @param callback
+     *            if not empty, contains the url where the result of the async operation will be sent
+     * @return the task.
+     * @throws MaxTimeWaitingExceedException
+     *             if the operation spend more time that is allowed
+     * @throws InvalidExecutionException
+     *             if the return of the task is not success
+     */
+    // T uninstall(String vdc, Long id)
+    // throws MaxTimeWaitingExceedException, InvalidExecutionException;
+
+     ProductInstanceDto uninstall(String vdc, String name, String token) throws MaxTimeWaitingExceedException, InvalidExecutionException;
+
 
 }
