@@ -244,6 +244,7 @@ public class ProductInstance extends InstallableInstance implements Comparable<P
     	ProductInstanceDto pInstanceDto = new ProductInstanceDto (getProductRelease().toReleaseDto(), getVm());
     	pInstanceDto.setVdc(getVdc());
     	pInstanceDto.setAttributes(getAttributes());
+    	pInstanceDto.setName(getName());
     	return pInstanceDto;
     }
 }
