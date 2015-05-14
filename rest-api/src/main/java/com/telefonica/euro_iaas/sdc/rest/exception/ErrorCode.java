@@ -24,6 +24,8 @@
 
 package com.telefonica.euro_iaas.sdc.rest.exception;
 
+import com.telefonica.euro_iaas.sdc.exception.ProductReleaseStillInstalledException;
+
 public enum ErrorCode {
 
     DB_CONNECTION(20, "Could not open connection to database", "(.*)JDBCConnectionException(.*)", 500),
@@ -43,6 +45,8 @@ public enum ErrorCode {
     INFRASTRUCTURE(50, "OpenStack infrastructure failure", "(.*)InfrastructureException(.*)", 500),
     
     INVALID_PRODUCT(60, "Invalid product", "(.*)InvalidProduct(.*)", 400),
+    STILL_INSTALLED_PRODUCT(61, "A ProductInstance associated to this product is still installed", 
+    		"(.*)ProductReleaseStillInstalledException(.*)", 400),
     
     DEFAULT(500, "Internal SDC Server error", "(?s).*", 500);
 
