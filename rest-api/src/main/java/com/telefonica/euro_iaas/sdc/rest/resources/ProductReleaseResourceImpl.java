@@ -197,8 +197,8 @@ public class ProductReleaseResourceImpl implements ProductReleaseResource {
             log.warning("EntityNotFoundException: " + e.getMessage());
             throw new APIException(new EntityNotFoundException(ProductRelease.class, pName + "-" + version, e));
         } catch (ProductReleaseStillInstalledException e) {
-            log.warning("EntityNotFoundException: " + e.getMessage());
-            throw new APIException(new ProductReleaseStillInstalledException(ProductRelease.class, pName + "-" + version, e));
+            log.warning("ProductReleaseStillInstalledException: " + e.getMessage());
+            throw new APIException(new ProductReleaseStillInstalledException(e.getMessage(), e));
         }
     }
 
