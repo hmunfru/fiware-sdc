@@ -48,7 +48,7 @@ public enum ErrorCode {
     
     INVALID_PRODUCT(60, "Invalid product", "(.*)InvalidProduct(.*)", 400),
     STILL_INSTALLED_PRODUCT(61, "A ProductInstance associated to this product is still installed", 
-    		"(.*)ProductReleaseStillInstalledException(.*)", 400),
+    		"(.*)ProductReleaseStillInstalledException(.*)", 412),
     
     DEFAULT(500, "Internal SDC Server error", "(?s).*", 500);
 
