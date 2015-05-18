@@ -41,7 +41,9 @@ public enum ErrorCode {
             "The environment is being used by an instance",
             "(.*)InvalidEntityException: (.*)is being used(.*)",
             403),
-    NAME_NO_VALID(41, "The entity is not valid", "(.*)InvalidEntityException:(.*)", 400),
+    PRODUCTRELEASES_ASSOCIATED(41, "This product has product releases associated", 
+    		"(.*)InvalidEntityException:(.*)releases associated(.*)", 412),
+    NAME_NO_VALID(42, "The entity is not valid", "(.*)InvalidEntityException:(.*)", 400),
     INFRASTRUCTURE(50, "OpenStack infrastructure failure", "(.*)InfrastructureException(.*)", 500),
     
     INVALID_PRODUCT(60, "Invalid product", "(.*)InvalidProduct(.*)", 400),
