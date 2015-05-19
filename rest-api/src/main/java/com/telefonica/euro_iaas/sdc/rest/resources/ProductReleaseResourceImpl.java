@@ -197,8 +197,10 @@ public class ProductReleaseResourceImpl implements ProductReleaseResource {
             log.warning("EntityNotFoundException: " + e.getMessage());
             throw new APIException(new EntityNotFoundException(ProductRelease.class, pName + "-" + version, e));
         } catch (ProductReleaseStillInstalledException e) {
-            log.warning("ProductReleaseStillInstalledException: " + e.getMessage());
-            throw new APIException(new ProductReleaseStillInstalledException(e.getMessage(), e));
+        	String msg = "ProductReleaseStillInstalledException: A ProductInstance associated to this product " 
+        		+ pName + "-" + version + " is still installed ";
+            log.warning(msg + e.getMessage());
+            throw new APIException(new ProductReleaseStillInstalledException(msg, e));
         }
     }
 
