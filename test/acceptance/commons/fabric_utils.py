@@ -32,7 +32,7 @@ from constants import FABRIC_RESULT_EXECUTE
 from StringIO import StringIO
 
 # Command templates to be used by this helper
-COMMAND_CHEF_CLIENT = "chef-client -i 10 -d"
+COMMAND_CHEF_CLIENT = "chef-client -i 30 -d"
 COMMAND_CHEF_CLIENT_ONCE = "chef-client"
 COMMAND_CHEF_CLIENT_STOP = "killall chef-client"
 COMMAND_RM_CHEF_CERTS = "rm /etc/chef/client.pem"
