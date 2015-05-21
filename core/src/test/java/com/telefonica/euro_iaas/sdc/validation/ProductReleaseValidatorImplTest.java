@@ -166,4 +166,29 @@ public class ProductReleaseValidatorImplTest {
             verify(productInstanceDao).findByCriteria(any(ProductInstanceSearchCriteria.class));
         }
     }
+    
+    @Test
+    public void shouldValidateDeleteWithProductInstancesWithStatusUninstalled() {
+        // given
+
+        ProductReleaseValidatorImpl productReleaseValidator = new ProductReleaseValidatorImpl();
+        ProductRelease productRelease = new ProductRelease();
+        ProductInstanceDao productInstanceDao = mock(ProductInstanceDao.class);
+        productReleaseValidator.setProductInstanceDao(productInstanceDao);
+        List<ProductInstance> productInstances = new ArrayList<ProductInstance>(2);
+        ProductInstance productInstance1 = new ProductInstance();
+        productInstance1.setStatus(InstallableInstance.Status.UNINSTALLED);
+        productInstances.add(productInstance1);
+
+        // when
+        when(productInstanceDao.findByCriteria(any(ProductInstanceSearchCriteria.class))).thenReturn(productInstances);
+        try {
+            productReleaseValidator.validateDelete(productRelease);
+            fail("not exist instances with status=UNINSTALLED");
+        } catch (ProductReleaseStillInstalledException e) {
+            // then
+            assertTrue(true);
+            verify(productInstanceDao).findByCriteria(any(ProductInstanceSearchCriteria.class));
+        }
+    }
 }
