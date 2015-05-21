@@ -49,6 +49,11 @@ public class ProductReleaseValidatorImpl implements ProductReleaseValidator {
                     || Status.UPGRADING.equals(productStatus) || Status.INSTALLING.equals(productStatus)) {
                 productInstances.add(product);
             }
+            
+            if (Status.UNINSTALLED.equals(productStatus)){
+            	throw new ProductReleaseStillInstalledException(productInstances);
+            }
+            	
         }
 
         // validate if the products are installed
