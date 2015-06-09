@@ -130,7 +130,7 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
 
     public Task uninstall(String vdc, String name, String callback) {
 
-        ProductInstance product = load(vdc, name);
+        ProductInstance product = loadProductInstance(vdc, name);
         Task task = uninstall(product, vdc, callback);
         return task;
     }
@@ -148,7 +148,7 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
      */
 
     public Task upgrade(String vdc, String name, String version, String callback) {
-        ProductInstance productInstance = load(vdc, name);
+        ProductInstance productInstance = loadProductInstance(vdc, name);
         Task task = upgrade(vdc, productInstance, version, callback);
         return task;
 
@@ -178,7 +178,7 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
      */
 
     public Task configure(String vdc, String name, String callback, Attributes arguments) {
-        ProductInstance productInstance = load(vdc, name);
+        ProductInstance productInstance = loadProductInstance(vdc, name);
         Task task = configure(vdc, productInstance, arguments, callback);
         return task;
     }
@@ -205,10 +205,10 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
      * {@inheritDoc}
      */
 
-    public ProductInstance load(String vdc, String name) {
+    public ProductInstanceDto load(String vdc, String name) {
         try {
             ProductInstance pro = productInstanceAsyncManager.load(vdc, name);
-            return pro;
+            return pro.toProductInstanceDto();
         } catch (EntityNotFoundException e) {
             throw new WebApplicationException(e, 404);
         } catch (Exception e) {
@@ -220,7 +220,7 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
      * {@inheritDoc}
      */
 
-    public List<ProductInstance> findAll(String hostname, String domain, String ip, String fqn, Integer page,
+    public List<ProductInstanceDto> findAll(String hostname, String domain, String ip, String fqn, Integer page,
             Integer pageSize, String orderBy, String orderType, Status status, String vdc, String product) {
         ProductInstanceSearchCriteria criteria = new ProductInstanceSearchCriteria();
         criteria.setVdc(vdc);
@@ -246,8 +246,14 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
         if (!StringUtils.isEmpty(product)) {
             criteria.setProductName(product);
         }
-
-        return productInstanceAsyncManager.findByCriteria(criteria);
+        List<ProductInstance> productInstances = productInstanceAsyncManager.findByCriteria(criteria);
+        List<ProductInstanceDto> productInstanceDtos = new ArrayList<ProductInstanceDto>();
+        
+        for (int i=0; i < productInstances.size(); i++){
+        	productInstanceDtos.add(productInstances.get(i).toProductInstanceDto());
+        }
+        
+        return productInstanceDtos;
     }
 
     private Task createTask(String description, String vdc) {
@@ -307,4 +313,13 @@ public class ProductInstanceResourceImpl implements ProductInstanceResource {
 
     }
 
+    private ProductInstance loadProductInstance(String vdc, String name) {
+        try {
+        	return productInstanceAsyncManager.load(vdc, name);
+        } catch (EntityNotFoundException e) {
+            throw new WebApplicationException(e, 404);
+        } catch (Exception e) {
+            throw new WebApplicationException(e, 500);
+        }
+    }
 }

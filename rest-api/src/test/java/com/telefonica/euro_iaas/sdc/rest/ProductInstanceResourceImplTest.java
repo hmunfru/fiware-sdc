@@ -146,9 +146,9 @@ public class ProductInstanceResourceImplTest {
     @Test
     public void testListProduct() throws Exception {
 
-        List<ProductInstance> pProductInstance = productInstanceResource.findAll("hostname", "domain", "ip", "fqn",
+        List<ProductInstanceDto> pProductInstanceDto = productInstanceResource.findAll("hostname", "domain", "ip", "fqn",
                 null, null, null, null, Status.INSTALLED, VDC, "Product::server");
-        assertEquals(pProductInstance.size(), 1);
+        assertEquals(pProductInstanceDto.size(), 1);
 
     }
 }

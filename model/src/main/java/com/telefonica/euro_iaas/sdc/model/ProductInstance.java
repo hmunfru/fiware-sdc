@@ -38,6 +38,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.telefonica.euro_iaas.sdc.model.dto.ProductInstanceDto;
+import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.dto.VM;
 
 /**
@@ -234,4 +236,15 @@ public class ProductInstance extends InstallableInstance implements Comparable<P
         return sb.toString();
     }
 
+    /**
+     * Convert ProductInstance to Dto
+     * @return pInstanceDto
+     */
+    public ProductInstanceDto toProductInstanceDto() {
+    	ProductInstanceDto pInstanceDto = new ProductInstanceDto (getProductRelease().toReleaseDto(), getVm());
+    	pInstanceDto.setVdc(getVdc());
+    	pInstanceDto.setAttributes(getAttributes());
+    	pInstanceDto.setName(getName());
+    	return pInstanceDto;
+    }
 }

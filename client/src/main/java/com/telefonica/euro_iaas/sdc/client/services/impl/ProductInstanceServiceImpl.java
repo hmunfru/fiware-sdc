@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.telefonica.euro_iaas.sdc.client.ClientConstants;
 import com.telefonica.euro_iaas.sdc.client.exception.ResourceNotFoundException;
-import com.telefonica.euro_iaas.sdc.client.model.ProductInstances;
+import com.telefonica.euro_iaas.sdc.client.model.ProductInstanceDtos;
 import com.telefonica.euro_iaas.sdc.client.services.ProductInstanceService;
 import com.telefonica.euro_iaas.sdc.client.services.SdcClientConfig;
 import com.telefonica.euro_iaas.sdc.model.Artifact;
@@ -136,7 +136,7 @@ public class ProductInstanceServiceImpl extends AbstractInstallableService imple
      * {@inheritDoc}
      */
 
-    public List<ProductInstance> findAll(String hostname, String domain, String ip, String fqn, Integer page,
+    public List<ProductInstanceDto> findAll(String hostname, String domain, String ip, String fqn, Integer page,
             Integer pageSize, String orderBy, String orderType, Status status, String vdc, String productName,
             String token) {
         String url = getBaseHost() + MessageFormat.format(ClientConstants.BASE_PRODUCT_INSTANCE_PATH, vdc);
@@ -156,7 +156,7 @@ public class ProductInstanceServiceImpl extends AbstractInstallableService imple
             webResource.queryParam("product", productName);
 
             response = webResource.request(getType()).accept(getType()).get();
-            return response.readEntity(ProductInstances.class);
+            return response.readEntity(ProductInstanceDtos.class);
         } finally {
             if (response != null) {
                 response.close();
@@ -169,7 +169,7 @@ public class ProductInstanceServiceImpl extends AbstractInstallableService imple
      * {@inheritDoc}
      */
 
-    public ProductInstance load(String vdc, String name, String token) throws ResourceNotFoundException {
+    public ProductInstanceDto load(String vdc, String name, String token) throws ResourceNotFoundException {
         String url = getBaseHost() + MessageFormat.format(ClientConstants.PRODUCT_INSTANCE_PATH, vdc, name);
         return this.loadUrl(url, token, vdc);
     }
@@ -178,14 +178,14 @@ public class ProductInstanceServiceImpl extends AbstractInstallableService imple
      * {@inheritDoc}
      */
 
-    public ProductInstance loadUrl(String url, String token, String tenant) throws ResourceNotFoundException {
+    public ProductInstanceDto loadUrl(String url, String token, String tenant) throws ResourceNotFoundException {
         Response response = null;
         try {
             Invocation.Builder builder = createWebResource(url, token, tenant);
             response = builder.get();
-            return response.readEntity(ProductInstance.class);
+            return response.readEntity(ProductInstanceDto.class);
         } catch (Exception e) {
-            throw new ResourceNotFoundException(ProductInstance.class, url);
+            throw new ResourceNotFoundException(ProductInstanceDto.class, url);
         } finally {
             if (response != null) {
                 response.close();

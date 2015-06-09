@@ -43,7 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.telefonica.euro_iaas.sdc.client.exception.ResourceNotFoundException;
-import com.telefonica.euro_iaas.sdc.client.model.ProductInstances;
+import com.telefonica.euro_iaas.sdc.client.model.ProductInstanceDtos;
 import com.telefonica.euro_iaas.sdc.client.services.ProductInstanceService;
 import com.telefonica.euro_iaas.sdc.client.services.SdcClientConfig;
 import com.telefonica.euro_iaas.sdc.model.Artifact;
@@ -201,7 +201,7 @@ public class ProductInstanceServiceImplTest {
         String productName = "productName";
         String token = "token";
 
-        ProductInstances expectedList = new ProductInstances();
+        ProductInstanceDtos expectedList = new ProductInstanceDtos();
         String url = baseHost + "/vdc/" + vdc + "/productInstance";
         WebTarget webResource = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
@@ -214,9 +214,9 @@ public class ProductInstanceServiceImplTest {
         when(builder.accept(type)).thenReturn(builder);
 
         when(builder.get()).thenReturn(response);
-        when(response.readEntity(ProductInstances.class)).thenReturn(expectedList);
+        when(response.readEntity(ProductInstanceDtos.class)).thenReturn(expectedList);
 
-        List<ProductInstance> list = productInstanceService.findAll(hostname, domain, ip, fqn, page, pageSize, orderBy,
+        List<ProductInstanceDto> list = productInstanceService.findAll(hostname, domain, ip, fqn, page, pageSize, orderBy,
                 orderType, status, vdc, productName, token);
 
         // then
@@ -224,7 +224,7 @@ public class ProductInstanceServiceImplTest {
         verify(webResource).request(type);
         verify(builder).accept(type);
         verify(builder).get();
-        verify(response).readEntity(ProductInstances.class);
+        verify(response).readEntity(ProductInstanceDtos.class);
         verify(response).close();
     }
 
@@ -242,7 +242,7 @@ public class ProductInstanceServiceImplTest {
         String url = baseHost + "/vdc/" + vdc + "/productInstance/" + name;
         WebTarget webResource = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
-        ProductInstance expectedProductInstance = new ProductInstance();
+        ProductInstanceDto expectedProductInstanceDto = new ProductInstanceDto();
         Response response = mock(Response.class);
 
         // when
@@ -251,22 +251,22 @@ public class ProductInstanceServiceImplTest {
         when(builder.accept(type)).thenReturn(builder);
 
         when(builder.get()).thenReturn(response);
-        when(response.readEntity(ProductInstance.class)).thenReturn(expectedProductInstance);
+        when(response.readEntity(ProductInstanceDto.class)).thenReturn(expectedProductInstanceDto);
 
-        ProductInstance productInstance = null;
+        ProductInstanceDto productInstanceDto = null;
         try {
-            productInstance = productInstanceService.load(vdc, name, token);
+            productInstanceDto = productInstanceService.load(vdc, name, token);
         } catch (ResourceNotFoundException e) {
             fail();
         }
 
         // then
         verify(client.getClient()).target(url);
-        assertNotNull(productInstance);
+        assertNotNull(productInstanceDto);
         verify(webResource).request(type);
         verify(builder).accept(type);
         verify(builder).get();
-        verify(response).readEntity(ProductInstance.class);
+        verify(response).readEntity(ProductInstanceDto.class);
         verify(response).close();
     }
 
@@ -285,7 +285,7 @@ public class ProductInstanceServiceImplTest {
         String url = baseHost + "/vdc/" + vdc + "/productInstance/" + name;
         WebTarget webResource = mock(WebTarget.class);
         Invocation.Builder builder = mock(Invocation.Builder.class);
-        ProductInstance expectedProductInstance = new ProductInstance();
+        ProductInstanceDto expectedProductInstanceDto = new ProductInstanceDto();
         Response response = mock(Response.class);
 
         // when
@@ -295,22 +295,22 @@ public class ProductInstanceServiceImplTest {
         when(builder.header(any(String.class), any(Object.class))).thenReturn(builder);
 
         when(builder.get()).thenReturn(response);
-        when(response.readEntity(ProductInstance.class)).thenReturn(expectedProductInstance);
+        when(response.readEntity(ProductInstanceDto.class)).thenReturn(expectedProductInstanceDto);
 
-        ProductInstance productInstance = null;
+        ProductInstanceDto productInstanceDto = null;
         try {
-            productInstance = productInstanceService.loadUrl(url, vdc, token);
+        	productInstanceDto = productInstanceService.loadUrl(url, vdc, token);
         } catch (ResourceNotFoundException e) {
             fail();
         }
 
         // then
         verify(client.getClient()).target(url);
-        assertNotNull(productInstance);
+        assertNotNull(productInstanceDto);
         verify(webResource).request(type);
         verify(builder).accept(type);
         verify(builder).get();
-        verify(response).readEntity(ProductInstance.class);
+        verify(response).readEntity(ProductInstanceDto.class);
         verify(response).close();
 
     }
