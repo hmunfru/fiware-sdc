@@ -48,10 +48,8 @@ public class ProductInstanceDto extends InstallableInstance {
 
     // private ProductReleaseDto product;
     private ReleaseDto product;
-    //private VM vm;
     private List<Attribute> attributes;
     private String vdc;
-    //private String name;
    
     /**
      */
@@ -82,20 +80,6 @@ public class ProductInstanceDto extends InstallableInstance {
         this.product = product;
     }
 
-    /**
-     * @return the vm
-     */
-    /*public VM getVm() {
-        return vm;
-    }*/
-
-    /**
-     * @param vm
-     *            the vm to set
-     */
-    /*public void setVm(VM vm) {
-        this.vm = vm;
-    }*/
 
     /**
      * @return the attributes
@@ -127,20 +111,6 @@ public class ProductInstanceDto extends InstallableInstance {
         this.vdc = vdc;
     }
     
-    /**
-     * @return the name
-     */
-   /* public String getName() {
-        return name;
-    }*/
-    
-    /**
-     * @param name
-     *            the name to set
-     */
-    /*public void setName(String name) {
-        this.name = name;
-    }*/
 
     /**
      * Constructs a <code>String</code> with all attributes in name = value
