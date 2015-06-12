@@ -91,7 +91,7 @@ public class ProductInstanceResourceValidatorImpl implements ProductInstanceReso
         }
 
         if (product.getVm() == null) {
-            throw new InvalidProductException("The product is null");
+            throw new InvalidProductException("The VM is null");
         }
 
         try {

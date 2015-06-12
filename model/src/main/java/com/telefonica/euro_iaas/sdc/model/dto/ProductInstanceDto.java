@@ -26,11 +26,15 @@ package com.telefonica.euro_iaas.sdc.model.dto;
 
 import java.util.List;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.telefonica.euro_iaas.sdc.model.Attribute;
+import com.telefonica.euro_iaas.sdc.model.InstallableInstance;
+import com.telefonica.euro_iaas.sdc.model.InstallableInstance.Status;
 
 /**
  * DTO to receive the complete information when a product release is going to be
@@ -40,15 +44,15 @@ import com.telefonica.euro_iaas.sdc.model.Attribute;
  */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ProductInstanceDto {
+public class ProductInstanceDto extends InstallableInstance {
 
     // private ProductReleaseDto product;
     private ReleaseDto product;
-    private VM vm;
+    //private VM vm;
     private List<Attribute> attributes;
     private String vdc;
-    private String name;
-
+    //private String name;
+   
     /**
      */
     public ProductInstanceDto() {
@@ -60,7 +64,7 @@ public class ProductInstanceDto {
      */
     public ProductInstanceDto(ReleaseDto product, VM vm) {
         this.product = product;
-        this.vm = vm;
+        setVm(vm);
     }
 
     /**
@@ -81,17 +85,17 @@ public class ProductInstanceDto {
     /**
      * @return the vm
      */
-    public VM getVm() {
+    /*public VM getVm() {
         return vm;
-    }
+    }*/
 
     /**
      * @param vm
      *            the vm to set
      */
-    public void setVm(VM vm) {
+    /*public void setVm(VM vm) {
         this.vm = vm;
-    }
+    }*/
 
     /**
      * @return the attributes
@@ -126,17 +130,17 @@ public class ProductInstanceDto {
     /**
      * @return the name
      */
-    public String getName() {
+   /* public String getName() {
         return name;
-    }
+    }*/
     
     /**
      * @param name
      *            the name to set
      */
-    public void setName(String name) {
+    /*public void setName(String name) {
         this.name = name;
-    }
+    }*/
 
     /**
      * Constructs a <code>String</code> with all attributes in name = value
@@ -144,10 +148,14 @@ public class ProductInstanceDto {
      * 
      * @return a <code>String</code> representation of this object.
      */
+    
+  
     public String toString() {
         StringBuilder sb = new StringBuilder("[[ProductInstanceDto]");
+        sb.append("[name = ").append(getName()).append("]");
+        sb.append("[status = ").append(getStatus()).append("]");
         sb.append("[product = ").append(this.product).append("]");
-        sb.append("[vm = ").append(this.vm).append("]");
+        sb.append("[vm = ").append(getVm()).append("]");
         sb.append("[attributes = ").append(this.attributes).append("]");
         sb.append("[vdc = ").append(this.vdc).append("]");
         sb.append("]");
