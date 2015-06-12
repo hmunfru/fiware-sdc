@@ -34,12 +34,23 @@ import com.telefonica.euro_iaas.sdc.model.ProductInstance;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
 import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductInstanceSearchCriteria;
 
+/**
+ * Default implementation for ProductReleaseValidator
+ * 
+ * @author Jesus m. Movilla
+ */
 public class ProductReleaseValidatorImpl implements ProductReleaseValidator {
 
     private ProductInstanceDao productInstanceDao;
-
+    
+    /**
+     * Validate if product release canbe deleted
+     * It is not deleted if the product release has been tried to be installed at least once
+     * @param productRelease
+     * 		the productRelease to be deleted
+     * @return 
+     */
     public void validateDelete(ProductRelease productRelease) throws ProductReleaseStillInstalledException {
-        // validate if the product release are installed on some VMs
         List<ProductInstance> productInstancesByProduct = getProductInstancesByProduct(productRelease);
         List<ProductInstance> productInstances = new ArrayList<ProductInstance>();
 
@@ -49,9 +60,13 @@ public class ProductReleaseValidatorImpl implements ProductReleaseValidator {
                     || Status.UPGRADING.equals(productStatus) || Status.INSTALLING.equals(productStatus)) {
                 productInstances.add(product);
             }
+            
+            if (Status.UNINSTALLED.equals(productStatus)){
+            	throw new ProductReleaseStillInstalledException(productInstances);
+            }
+            	
         }
 
-        // validate if the products are installed
         if (!productInstances.isEmpty()) {
             throw new ProductReleaseStillInstalledException(productInstances);
         }

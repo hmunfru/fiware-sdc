@@ -121,11 +121,3 @@ Feature: Remove nodes from chef/puppet servers with E2E validations
       | cm_tool |
       | chef    |
       | puppet  |
-
-
-    Scenario: Remove non-existent node
-
-      Given a configuration management with "<cm_tool>"
-      And a node name "nonexistent_node"
-      When I remove the node
-      Then I obtain a "404" HTTP error

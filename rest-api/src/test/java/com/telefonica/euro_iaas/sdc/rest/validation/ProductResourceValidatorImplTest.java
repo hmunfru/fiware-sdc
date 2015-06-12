@@ -54,6 +54,7 @@ import com.telefonica.euro_iaas.sdc.model.Product;
 import com.telefonica.euro_iaas.sdc.model.ProductRelease;
 import com.telefonica.euro_iaas.sdc.model.dto.ProductReleaseDto;
 import com.telefonica.euro_iaas.sdc.model.dto.ReleaseDto;
+import com.telefonica.euro_iaas.sdc.model.searchcriteria.ProductReleaseSearchCriteria;
 import com.telefonica.euro_iaas.sdc.util.SystemPropertiesProvider;
 
 public class ProductResourceValidatorImplTest extends ValidatorUtils {
@@ -351,7 +352,31 @@ public class ProductResourceValidatorImplTest extends ValidatorUtils {
                 new EntityNotFoundException(ProductRelease.class, "", productRelease));
         productResourceValidator.validateInsert("name", productRelease);
     }
-
+    
+    @Test(expected = InvalidEntityException.class)
+    public void testValidateProductDeleteWithProductrelease() throws Exception {
+    	product.setName("test");
+    	
+    	ProductRelease pRelease1 = new ProductRelease();
+        pRelease1.setProduct(product);
+        pRelease1.setVersion("1.0");
+        List<ProductRelease> productReleases = Arrays.asList(pRelease1);
+        
+    	when(productReleaseManager.findReleasesByCriteria(any(ProductReleaseSearchCriteria.class))).thenReturn(
+        		productReleases);
+        productResourceValidator.validateDelete(product);
+    }
+    
+    public void testValidateProductDeleteWithoutProductrelease() throws Exception {
+    	product.setName("test");
+    	
+    	List<ProductRelease> productReleases = Arrays.asList(new ProductRelease());
+        
+    	when(productReleaseManager.findReleasesByCriteria(any(ProductReleaseSearchCriteria.class))).thenReturn(
+        		productReleases);
+        productResourceValidator.validateDelete(product);
+    }
+    
     @Test
     public void testValidateAttributes() throws InvalidEntityException, AlreadyExistsEntityException,
             InvalidProductException {

@@ -473,11 +473,17 @@ public class ProductResourceImpl implements ProductResource {
      */
     public void delete(String name) throws APIException {
         Product product;
+        
         try {
             product = productManager.load(name);
+            validator.validateDelete(product);
         } catch (EntityNotFoundException e) {
-            log.warning("EntityNotFoundException: " + e.getMessage());
-            throw new APIException(new EntityNotFoundException(Product.class, name, e));
+        	log.warning("EntityNotFoundException: " + e.getMessage());
+        	throw new APIException(new EntityNotFoundException(Product.class,name, e));
+        } catch (InvalidEntityException e2) {
+        	String mes = "The product " + name + " has releases associated. ";
+        	log.warning("InvalidEntityException: " + mes +  e2.getMessage());
+        	throw new APIException(new InvalidEntityException(Product.class, new Exception(mes)));
         }
         productManager.delete(product);
     }

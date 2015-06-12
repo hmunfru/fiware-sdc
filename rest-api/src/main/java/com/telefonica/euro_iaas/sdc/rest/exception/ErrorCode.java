@@ -24,6 +24,8 @@
 
 package com.telefonica.euro_iaas.sdc.rest.exception;
 
+import com.telefonica.euro_iaas.sdc.exception.ProductReleaseStillInstalledException;
+
 public enum ErrorCode {
 
     DB_CONNECTION(20, "Could not open connection to database", "(.*)JDBCConnectionException(.*)", 500),
@@ -39,10 +41,14 @@ public enum ErrorCode {
             "The environment is being used by an instance",
             "(.*)InvalidEntityException: (.*)is being used(.*)",
             403),
-    NAME_NO_VALID(41, "The entity is not valid", "(.*)InvalidEntityException:(.*)", 400),
+    PRODUCTRELEASES_ASSOCIATED(41, "This product has product releases associated", 
+    		"(.*)InvalidEntityException:(.*)releases associated(.*)", 412),
+    NAME_NO_VALID(42, "The entity is not valid", "(.*)InvalidEntityException:(.*)", 400),
     INFRASTRUCTURE(50, "OpenStack infrastructure failure", "(.*)InfrastructureException(.*)", 500),
     
     INVALID_PRODUCT(60, "Invalid product", "(.*)InvalidProduct(.*)", 400),
+    STILL_INSTALLED_PRODUCT(61, "A ProductInstance associated to this product is still installed", 
+    		"(.*)ProductReleaseStillInstalledException(.*)", 412),
     
     DEFAULT(500, "Internal SDC Server error", "(?s).*", 500);
 
