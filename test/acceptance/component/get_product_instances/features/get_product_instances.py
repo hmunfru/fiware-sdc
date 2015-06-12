@@ -43,7 +43,6 @@ def the_product_instance_is_returned_in_the_list(step):
     instance_id = generate_product_instance_id(world.vm_fqn, world.product_name, world.product_version)
     assert_true(world.response.ok, 'RESPONSE: {}'.format(world.response))
     
-    #response_body = xml_to_dict(world.response.content)[PRODUCT_INSTANCE_LIST][PRODUCT_INSTANCE_RES]
     response_body = response_body_to_dict(world.response, world.headers[ACCEPT_HEADER],
                                           xml_root_element_name=PRODUCT_INSTANCE_LIST)
     response_body = response_body
@@ -75,9 +74,8 @@ def i_get_the_product_instance_details(step):
 def the_product_instance_is_returned(step):
     assert_true(world.response.ok, 'RESPONSE: {}'.format(world.response))
 
-    #response_body = xml_to_dict(world.response.content)[PRODUCT_INSTANCE_RES]
     response_body = response_body_to_dict(world.response, world.headers[ACCEPT_HEADER],
-                                          xml_root_element_name=PRODUCT_INSTANCE_RES)
+                                          xml_root_element_name=PRODUCT_INSTANCE)
 
     assert_equals(response_body[PRODUCT_INSTANCE_NAME], world.instance_id)
     assert_true(response_body[PRODUCT_INSTANCE_STATUS] != "")

@@ -105,7 +105,7 @@ class ProvisioningSteps():
         assert_true(response.ok, 'RESPONSE: {}'.format(response))
 
         response_body = response_body_to_dict(response, world.headers[ACCEPT_HEADER],
-                                              xml_root_element_name=PRODUCT_INSTANCE_RES)
+                                              xml_root_element_name=PRODUCT_INSTANCE)
 
         assert_equals(response_body[PRODUCT_INSTANCE_NAME], world.instance_id)
         assert_true(response_body[PRODUCT_INSTANCE_STATUS] != "")
@@ -135,7 +135,7 @@ class ProvisioningSteps():
             assert_true(response.ok, 'RESPONSE: {}'.format(response))
 
             response_body = response_body_to_dict(response, world.headers[ACCEPT_HEADER],
-                                                  xml_root_element_name=PRODUCT_INSTANCE_RES)
+                                                  xml_root_element_name=PRODUCT_INSTANCE)
             world.instance_status = response_body[PRODUCT_INSTANCE_STATUS]
 
         assert_equals(world.instance_status, status)
