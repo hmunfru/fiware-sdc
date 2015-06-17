@@ -115,8 +115,8 @@ class ProvisioningSteps():
         ip_aux = "" if world.vm_ip is None else world.vm_ip
         assert_equals(response_body[PRODUCT_INSTANCE_VM][PRODUCT_INSTANCE_VM_IP], ip_aux)
 
-        assert_equals(response_body[PRODUCT_RELEASE][VERSION], world.product_version)
-        assert_equals(response_body[PRODUCT_RELEASE][PRODUCT][PRODUCT_NAME], world.product_name)
+        assert_equals(response_body[PRODUCT][VERSION], world.product_version)
+        assert_equals(response_body[PRODUCT][PRODUCT_NAME], world.product_name)
 
         world.instance_status = response_body[PRODUCT_INSTANCE_STATUS]
 
