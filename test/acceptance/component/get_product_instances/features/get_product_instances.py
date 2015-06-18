@@ -61,8 +61,8 @@ def the_product_instance_is_returned_in_the_list(step):
     assert_equals(product_instance[PRODUCT_INSTANCE_VM][PRODUCT_INSTANCE_VM_FQN], world.vm_fqn)
     assert_equals(product_instance[PRODUCT_INSTANCE_VM][PRODUCT_INSTANCE_VM_HOSTNAME], world.vm_hostname)
     
-    assert_equals(product_instance[PRODUCT_RELEASE][VERSION], world.product_version)
-    assert_equals(product_instance[PRODUCT_RELEASE][PRODUCT][PRODUCT_NAME], world.product_name)
+    assert_equals(product_instance[PRODUCT][VERSION], world.product_version)
+    assert_equals(product_instance[PRODUCT][PRODUCT_NAME], world.product_name)
 
 @step(u'I get the product instance details')
 def i_get_the_product_instance_details(step):
@@ -83,8 +83,8 @@ def the_product_instance_is_returned(step):
     assert_equals(response_body[PRODUCT_INSTANCE_VM][PRODUCT_INSTANCE_VM_FQN], world.vm_fqn)
     assert_equals(response_body[PRODUCT_INSTANCE_VM][PRODUCT_INSTANCE_VM_HOSTNAME], world.vm_hostname)
 
-    assert_equals(response_body[PRODUCT_RELEASE][VERSION], world.product_version)
-    assert_equals(response_body[PRODUCT_RELEASE][PRODUCT][PRODUCT_NAME], world.product_name)
+    assert_equals(response_body[PRODUCT][VERSION], world.product_version)
+    assert_equals(response_body[PRODUCT][PRODUCT_NAME], world.product_name)
 
 
 @step(u'the HTTP response code is (.*)')
