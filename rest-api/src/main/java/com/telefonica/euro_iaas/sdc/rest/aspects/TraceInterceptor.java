@@ -35,7 +35,7 @@ public class TraceInterceptor extends CustomizableTraceInterceptor {
         if(ex!=null){
             logger.error(ex);
         }else if (message.contains("ENTER")) {
-            logger.info(message);
+            logger.debug(message);
         } else if (message.contains("EXIT")) {
             logger.debug(message);
         }
