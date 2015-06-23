@@ -46,11 +46,11 @@ public class TraceInterceptorTest {
     public void writeToLogwithENTERMessage() throws Exception {
         TraceInterceptor ti = new TraceInterceptor();
         Log log = mock(Log.class);
-        log.info(anyString());
+        log.debug(anyString());
 
         ti.writeToLog(log, "is ENTER msg", null);
 
-        verify(log).info("is ENTER msg");
+        verify(log).debug("is ENTER msg");
     }
 
     /**
