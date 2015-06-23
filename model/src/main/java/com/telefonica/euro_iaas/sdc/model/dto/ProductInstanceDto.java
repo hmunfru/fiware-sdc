@@ -46,9 +46,7 @@ import com.telefonica.euro_iaas.sdc.model.InstallableInstance.Status;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProductInstanceDto extends InstallableInstance {
 
-    // private ProductReleaseDto product;
     private ReleaseDto product;
-    private List<Attribute> attributes;
     private String vdc;
    
     /**
@@ -82,21 +80,6 @@ public class ProductInstanceDto extends InstallableInstance {
 
 
     /**
-     * @return the attributes
-     */
-    public List<Attribute> getAttributes() {
-        return attributes;
-    }
-
-    /**
-     * @param attributes
-     *            the attributes to set
-     */
-    public void setAttributes(List<Attribute> attributes) {
-        this.attributes = attributes;
-    }
-
-    /**
      * @return the vdc
      */
     public String getVdc() {
@@ -126,7 +109,7 @@ public class ProductInstanceDto extends InstallableInstance {
         sb.append("[status = ").append(getStatus()).append("]");
         sb.append("[product = ").append(this.product).append("]");
         sb.append("[vm = ").append(getVm()).append("]");
-        sb.append("[attributes = ").append(this.attributes).append("]");
+        sb.append("[attributes = ").append(getAttributes()).append("]");
         sb.append("[vdc = ").append(this.vdc).append("]");
         sb.append("]");
         return sb.toString();
