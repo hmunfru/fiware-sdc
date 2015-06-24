@@ -118,6 +118,18 @@ class ProvisioningSteps():
         assert_equals(response_body[PRODUCT][VERSION], world.product_version)
         assert_equals(response_body[PRODUCT][PRODUCT_NAME], world.product_name)
 
+        # If the instance has been created with attributes, check it.
+        if world.instance_attributes is not None:
+            # Check if attributes have got type.
+            # Else, add plain type before check it (default type)
+            for attribute in world.instance_attributes:
+                if ATTRIBUTE_TYPE not in attribute:
+                    attribute.update({ATTRIBUTE_TYPE: ATTRIBUTE_TYPE_PLAIN})
+
+            world.instance_attributes = world.instance_attributes[0] \
+                if len(world.instance_attributes) == 1 else world.instance_attributes
+            assert_equals(response_body[PRODUCT_INSTANCE_ATTRIBUTES], world.instance_attributes)
+
         world.instance_status = response_body[PRODUCT_INSTANCE_STATUS]
 
     def the_product_installation_status_is(self, step, status):
