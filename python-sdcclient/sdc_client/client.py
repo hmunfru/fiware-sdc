@@ -54,7 +54,7 @@ def generate_transaction_id():
     return TRANSACTION_ID_PATTERN.format(uuid=uuid.uuid4())
 
 
-class SDCManagerClient():
+class SDCClient():
 
     headers = dict()
     keystone_client = None
