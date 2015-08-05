@@ -27,9 +27,9 @@ import re
 
 from keystoneclient.v2_0 import Client as KeystoneClient
 
-from qa_utils.rest_client_utils import HEADER_REPRESENTATION_XML, HEADER_CONTENT_TYPE, HEADER_TRANSACTION_ID
-from qa_utils.logger_utils import get_logger
-from sdc_client.productandrelease_resource_client import ProductAndReleaseResourceClient
+from utils.rest_client_utils import HEADER_REPRESENTATION_XML, HEADER_CONTENT_TYPE, HEADER_TRANSACTION_ID
+from utils.logger_utils import get_logger
+from sdcclient.productandrelease_resource_client import ProductAndReleaseResourceClient
 
 logger = get_logger("sdcClient")
 
@@ -73,7 +73,7 @@ class SDCClient():
         :return: None
         """
 
-        logger.info("Init PaaSManager Client")
+        logger.info("Init SDC Client")
         logger.debug("Client parameters: Username: %s, Password: %s, TenantId: %s, AuthURL: %s, RegionName: %s, "
                      "ServiceType: %s, EndpointType: %s", username, password, tenant_id, auth_url, region_name,
                      service_type, endpoint_type)
