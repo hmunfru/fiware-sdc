@@ -135,6 +135,8 @@ class RestClient(object):
         :param **kwargs: URL parameters (without url_root) to fill the patters
         :returns: REST API response ('Requests' response)
         """
+        print uri_pattern
+        print headers
         return self._call_api(uri_pattern, HTTP_VERB_GET, headers=headers, parameters=parameters, **kwargs)
 
     def post(self, uri_pattern, body, headers=None, parameters=None, **kwargs):
@@ -253,3 +255,4 @@ def model_to_request_body(body_model, content_type, body_model_root_element=None
         except Exception, e:
             logger.error("Error parsing the body model to JSON. Exception:" + str(e))
             raise e
+

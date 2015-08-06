@@ -22,8 +22,8 @@
 # contact with opensource@tid.es
 
 
-from utils.rest_client_utils import RestClient, API_ROOT_URL_ARG_NAME, model_to_request_body, HEADER_CONTENT_TYPE, \
-    HEADER_REPRESENTATION_XML
+from utils.rest_client_utils import RestClient, API_ROOT_URL_ARG_NAME, response_body_to_dict, \
+    HEADER_CONTENT_TYPE, HEADER_REPRESENTATION_XML
 from utils.logger_utils import get_logger
 
 logger = get_logger("sdcClient")
@@ -34,6 +34,8 @@ SDC_BASE_URI = "{" + API_ROOT_URL_ARG_NAME + "}"
 PRODUCTANDRELEASE_RESOURCE_ROOT_URI = SDC_BASE_URI + "/catalog/productandrelease"
 PRODUCTANDRELEASE_RESOURCE_DETAIL_URI = PRODUCTANDRELEASE_RESOURCE_ROOT_URI + "/{environment_name}"
 
+#BODY ELEMENT
+PRODUCTANDRELEASE_BODY_ROOT= "productAndReleaseDtoes"
 
 class ProductAndReleaseResourceClient(RestClient):
 
@@ -60,4 +62,8 @@ class ProductAndReleaseResourceClient(RestClient):
         :return:
         """
         logger.info("Get all ProductAndReleases")
-        return self.get(PRODUCTANDRELEASE_RESOURCE_ROOT_URI)
+        response = self.get(PRODUCTANDRELEASE_RESOURCE_ROOT_URI, headers=self.headers)
+        sr_response = response_body_to_dict(response, self.headers[HEADER_CONTENT_TYPE],
+                                          xml_root_element_name=PRODUCTANDRELEASE_BODY_ROOT)
+        #body = model_to_request_body(env_model, self.headers[HEADER_CONTENT_TYPE])
+        return sr_response
