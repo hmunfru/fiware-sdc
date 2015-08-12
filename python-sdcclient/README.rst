@@ -13,7 +13,7 @@ Environment
 - pip_ 6.0 or newer
 - Additional libs that are required before installing dependencies: Python Development Tools (python-devel),
 zlib-devel, bzip2-devel, openssl-devel, ncurses-devel, sqlite-devel, gcc
-- PaaSManager_
+- SDC_
 - `OpenStack Keystone service`_ v2 (so far, only Keystone v2 is supported for this client)
 
 __ `Python - Downloads`_
@@ -22,7 +22,7 @@ __ `Python - Downloads`_
 **Installation**
 
 All dependencies has been defined in ``requirements.txt``.
-To install the last version of this client, download it from the GIT PaaSManager repository (*master* branch)
+To install the last version of this client, download it from the GIT SDC repository (*master* branch)
 and install it, using following command:
 
 ::
@@ -35,10 +35,9 @@ Developed operations
 
 Following operations are already implemented:
 
-**Environment API Resource**
+**ProductAndRelease API Resource**
 
-- Create new environment
-- Delete environment
+- Get ProductAndRelease
 
 
 Python API
