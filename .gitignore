@@ -17,7 +17,7 @@ rest-api/jetty.base_IS_UNDEFINED/
 *.ear
 
 #IDE
-.idea
+python-sdcclient/.idea
 */*.iml
 *.iml
 
