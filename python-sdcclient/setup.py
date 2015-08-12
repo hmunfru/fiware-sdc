@@ -26,11 +26,19 @@
 from setuptools import setup
 from setuptools import find_packages
 
+from pip.req import parse_requirements
+
+REQUIREMENTS_FILE = "requirements.txt"
+# Get requirements list from requirements.txt file
+# > parse_requirements() returns generator of pip.req.InstallRequirement objects
+install_reqs = parse_requirements(REQUIREMENTS_FILE)
+# > requirements_list is a list of requirement; e.g. ['requests==2.6.0', 'Fabric==1.8.3']
+requirements_list = [str(ir.req) for ir in install_reqs]
 
 setup(name='python-sdcclient',
       version='0.0.2',
       description='SDC Client',
-      author='jfernandez',
+      author='jmms392',
       url='https://github.com/telefonicaid/fiware-sdc/python-sdcclient',
       packages=find_packages(),
-      install_requires=['requests', 'xmldict', 'xmltodict', 'python-keystoneclient==1.3.0'])
+      install_requires=requirements_list)

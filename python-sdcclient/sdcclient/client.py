@@ -31,7 +31,7 @@ from utils.rest_client_utils import HEADER_REPRESENTATION_XML, HEADER_CONTENT_TY
 from utils.logger_utils import get_logger
 from sdcclient.productandrelease_resource_client import ProductAndReleaseResourceClient
 
-logger = get_logger("sdcClient")
+logger = get_logger(__name__)
 
 # HEADERS
 X_AUTH_TOKEN = "X-Auth-Token"
@@ -68,8 +68,8 @@ class SDCClient():
         :param tenant_id: Fiware Tenant ID
         :param auth_url: Keystore URL
         :param region_name: Fiware Region name
-        :param service_type: PaaSManager Service type in Keystone (paasmanager by default)
-        :param endpoint_type: PaaSManager Endpoint type in Keystone (publicURL by default)
+        :param service_type: SDC Service type in Keystone (paasmanager by default)
+        :param endpoint_type: SDC Endpoint type in Keystone (publicURL by default)
         :return: None
         """
 
@@ -112,7 +112,7 @@ class SDCClient():
 
     def get_sdc_endpoint_from_keystone(self, region_name, service_type, endpoint_type):
         """
-        Get the endpoint of PaaSManager from Keystone Service Catalog
+        Get the endpoint of SDC from Keystone Service Catalog
         :param region_name: Name of the region
         :param service_type: Type of service (Endpoint name)
         :param endpoint_type: Type of the URL to look for
