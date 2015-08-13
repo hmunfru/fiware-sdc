@@ -32,20 +32,12 @@ The FIWARE Software Deployment and Configuration (SDC) GE is is the key enabler
 used to support automated deployment (installation and configuration) of software
 on running virtual machines. As part of the complete process of deployment of applications,
 the aim of SDC GE is to deploy software product instances upon request of the
-using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see PaaS Manager`__).
+using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see `PaaS Manager`__).
 
-__ `FIWARE PaaS Manager`_`
+__ `FIWARE PaaS Manager`_
 
 After that, users will be able to deploy artifacts, that are part of the application,
 on top of the deployed product instances
-
-Components
-----------
-Chef server
-
-Puppet master
-
-Puppet wrapper
 
 Build and Install
 =================
@@ -200,7 +192,9 @@ is running and the database configure correctly::
 The request to test it in the testbed should be::
 
   curl -v -k -H 'Access-Control-Request-Method: GET' -H 'Content-Type: application xml' -H 'Accept: application/xml'
-  -H 'X-Auth-Token: 5d035c3a29be41e0b7007383bdbbec57' -H 'Tenant-Id: 60b4125450fc4a109f50357894ba2e28' -X GET 'https://localhost:8443/sdc/rest/catalog/product'
+  -H 'X-Auth-Token: 5d035c3a29be41e0b7007383bdbbec57' -H 'Tenant-Id: 60b4125450fc4a109f50357894ba2e28'
+  -X GET 'https://localhost:8443/sdc/rest/catalog/product'
+
 the option -k should be included in the case you have not changed the security configuration of SDC. The result should be the product catalog.
 
 If you obtain a 401 as a response, please check the admin credentials and the connectivity from the sdc machine
