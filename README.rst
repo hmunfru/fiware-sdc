@@ -9,15 +9,12 @@ This is the code repository for FIWARE Saggita, the reference implementation
 of the Software Deployment and Configuration GE.
 
 This project is part of FIWARE_. Check also the
-`FIWARE Catalogue entry for Software Deployment and Configuration GE`__.
+`FIWARE Catalogue - Software Deployment and Configuration GE`_.
 
-__ `FIWARE Catalogue - Software Deployment and Configuration GE`_
 
 Any feedback on this documentation is highly welcome, including bugs, typos
-or things you think should be included but aren't. You can use `github issues`__
+or things you think should be included but aren't. You can use `FIWARE SDC - GitHub issues`_
 to provide feedback.
-
-__ `FIWARE SDC - GitHub issues`_
 
 For documentation previous to release 4.4.2 please check the manuals at FIWARE
 public wiki:
@@ -32,9 +29,7 @@ The FIWARE Software Deployment and Configuration (SDC) GE is is the key enabler
 used to support automated deployment (installation and configuration) of software
 on running virtual machines. As part of the complete process of deployment of applications,
 the aim of SDC GE is to deploy software product instances upon request of the
-using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see `PaaS Manager`__).
-
-__ `FIWARE PaaS Manager`_
+using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see `FIWARE PaaS Manager`_).
 
 After that, users will be able to deploy artifacts, that are part of the application,
 on top of the deployed product instances
@@ -103,7 +98,7 @@ be execute. To do that, it just needed to execute::
 Running
 =======
 
-As explained in the `GEi overall description`__ section, there are a variety of
+As explained in the `GEi overall description`_ section, there are a variety of
 elements involved in the Software Delivery and Configuration architecture, apart from those components
 provided by this Software Delivery and Configuration GE (at least, an instance of configuration
 engine like Chef server of Puppet master). Please
@@ -230,10 +225,7 @@ License
 .. _FIWARE SDC - Installation and Administration Guide: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Monitoring_-_Installation_and_Administration_Guide
 .. _FIWARE SDC - Apiary: https://jsapi.apiary.io/apis/fiwaresdc/reference.html
 .. _FIWARE PaaS Manager: https://github.com/telefonicaid/fiware-paas
-.. _Nagios: http://www.nagios.org/
-.. _Zabbix: http://www.zabbix.com/
-.. _openNMS: http://www.opennms.org/
-.. _perfSONAR: http://www.perfsonar.net/
+
 
 
 
