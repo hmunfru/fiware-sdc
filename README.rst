@@ -1,6 +1,6 @@
-==================
 FI-WARE SDC
 ============
+
 | |Build Status| |Coverage Status| |help stackoverflow|
 
 Introduction
