@@ -1,10 +1,9 @@
-FI-WARE SDC
-============
+====================
+FIWARE SDC | Saggita
+====================
 
 | |Build Status| |Coverage Status| |help stackoverflow|
 
-Introduction
-=======================
 This is the code repository for FIWARE Saggita, the reference implementation
 of the Software Deployment and Configuration GE.
 
@@ -32,7 +31,7 @@ the aim of SDC GE is to deploy software product instances upon request of the
 using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see `FIWARE PaaS Manager`_).
 
 After that, users will be able to deploy artifacts, that are part of the application,
-on top of the deployed product instances
+on top of the deployed product instances.
 
 Build and Install
 =================
@@ -59,10 +58,9 @@ Using FIWARE package repository (recommended)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Refer to the documentation of your Linux distribution to set up the URL of the
-repository where FIWARE packages are available (and update cache, if needed):
+repository where FIWARE packages are available (and update cache, if needed)::
 
     http://repositories.testbed.fiware.org/repo/rpm/x86_64
-
 
 Then, use the proper tool to install the packages
 
@@ -85,6 +83,21 @@ newer version of the Software  Deployment and Configuration components:
   described in the Installation_ section (the ``install`` subcommand also
   performs upgrades).
 - When upgrading from downloaded package files, use ``rpm -U`` in CentOS
+
+Using installation script
+~~~~~~~~~~~~~~~~~~~~~~~~~
+The installation of fiware-sdc can be done in the easiest way by executing the script::
+
+  scripts/bootstrap/centos.sh
+
+The script will ask you the following data to configure the configuration properties:
+
+- The database name for the fiware-sdc
+- The postgres password of the database
+- the keystone url to connect fiware-sdc for the authentication process
+- the admin keystone user for the authentication process
+- the admin password for the authentication process
+
 
 Upgrading database
 ~~~~~~~~~~~~~~~~~~
@@ -129,14 +142,31 @@ There, it is required to configure::
     $ openstack-tcloud.keystone.user: the admin user
     $ openstack-tcloud.keystone.password: the admin password
     $ openstack-tcloud.keystone.tenant: the admin tenant
-    $ sdc_manager_url: the final url, mainly http://sdc-ip:8080/sdc
+    $ sdc_manager_url: the final url, mainly https://sdc-ip:8443/sdc
 
+In addition, to configue the SDC application inside the webserver, it is needed to change the context file.
+To do that, change sdc.xml found in distribution file and store it in folder $SDC_HOME/webapps/.
+
+See the snipet bellow to know how it works::
+
+  <New id="sdc" class="org.eclipse.jetty.plus.jndi.Resource">
+    <Arg>jdbc/sdc</Arg>
+    <Arg>
+        <New class="org.postgresql.ds.PGSimpleDataSource">
+            <Set name="User"> <database user> </Set>
+            <Set name="Password"> <database password> </Set>
+            <Set name="DatabaseName"> <database name>   </Set>
+            <Set name="ServerName"> <IP/hostname> </Set>
+            <Set name="PortNumber">5432</Set>
+        </New>
+    </Arg>
+  </New>
 
 
 Checking status
 ---------------
 
-In order to check the status of the adapter service, use the following command
+In order to check the status of the service, use the following command
 (no special privileges required):
 
 ::
@@ -146,6 +176,21 @@ In order to check the status of the adapter service, use the following command
 
 API Overview
 ============
+
+The Software Deployment and Configuration offers a REST API, which it can be used for both
+managing the software catalogue and the installation of software in virtual machines.
+
+For instance, it is possible to obtain the software list in the catalogue with the
+following curl::
+
+  $ curl -v -H "Content-Type: application/json" -H "Accept: application/xml" -H
+"X-Auth-Token: your-token-id" -H "Tenant-Id: your-tenant-id"
+    -X GET "https://saggita.lab.fi-ware.org:8443/sdc/rest/catalog/product"
+
+Please have a look at the API Reference Documentation section bellow and at the programmer guide.
+
+API Reference Documentation
+---------------------------
 
 - `FIWARE SDC v1 (Apiary) <https://jsapi.apiary.io/apis/fiwaresdc/reference.html>`_
 
@@ -157,7 +202,9 @@ Unit tests
 ----------
 
 The ``test`` target for each module in the SDC is used for running the unit tests in both components of
-SDC GE:
+SDC GE. To execute the unit tests you just need to execute::
+
+    mvn test
 
 Please have a look at the section `building from source code
 <doc/installation-guide.rst#install-sdc-from-source>`_ in order to get more
@@ -172,6 +219,12 @@ In the following path you will find a set of tests related to the
 end-to-end funtionalities.
 
 - `SDC Aceptance Tests <https://github.com/telefonicaid/fiware-sdc/tree/develop/test>`_
+
+To execute the acceptance tests, go to the test/acceptance folder of the project and run::
+
+  lettuce_tools --tags=-skip.
+
+This command will execute all acceptance tests (see available params with the -h option)
 
 End to End testing
 ------------------
@@ -200,7 +253,7 @@ Advanced topics
 - `Installation and administration <doc/installation-guide.rst>`_
 
   * `Software requirements <doc/installation-guide.rst#requirements>`_
-  * `Building from sources <doc/ininstallation-guide.rst/#install-sdc-from-source>`_
+  * `Building from sources <doc/installation-guide.rst/#install-sdc-from-source>`_
   * `Resources & I/O Flows <doc/installation-guide.rst#resource-availability>`_
 
 - `User and programmers guide <doc/user_guide.rst>`_
