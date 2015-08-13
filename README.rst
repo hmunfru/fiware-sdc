@@ -9,7 +9,9 @@ This is the code repository for FIWARE Saggita, the reference implementation
 of the Software Deployment and Configuration GE.
 
 This project is part of FIWARE_. Check also the
-`_FIWARE Catalogue - Software Deployment and Configuration GE`__.
+`FIWARE Catalogue entry for Software Deployment and Configuration GE`__.
+
+__ `FIWARE Catalogue - Software Deployment and Configuration GE`_
 
 Any feedback on this documentation is highly welcome, including bugs, typos
 or things you think should be included but aren't. You can use `github issues`__
@@ -30,8 +32,10 @@ The FIWARE Software Deployment and Configuration (SDC) GE is is the key enabler
 used to support automated deployment (installation and configuration) of software
 on running virtual machines. As part of the complete process of deployment of applications,
 the aim of SDC GE is to deploy software product instances upon request of the
-using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see PaaS Manager__).
-__ `FIWARE PaaS Manager`_
+using the SDC API or through the Cloud Portal, which in turn uses the PaaS Manager GE (see PaaS Manager`__).
+
+__ `FIWARE PaaS Manager`_`
+
 After that, users will be able to deploy artifacts, that are part of the application,
 on top of the deployed product instances
 
@@ -46,9 +50,10 @@ Puppet wrapper
 Build and Install
 =================
 
-The recommended procedure is to install using RPM packages in CentOS 6.x
+The recommended procedure is to install using RPM packages in CentOS 6.x as it is explained in
+the `following document <doc/installation-guide.rst#install-sdc-from-rpm#>`_
 . If you are interested in building
-from sources, check `this document <doc/installation-guide.rst#install-sdc-from-rpm#>`_.
+from sources, check `this document <doc/installation-guide.rst#install-sdc-from-source#>`_.
 
 
 Requirements
@@ -97,7 +102,7 @@ newer version of the Software  Deployment and Configuration components:
 Upgrading database
 ~~~~~~~~~~~~~~~~~~
 In case the database needs to be upgrade, the script db-changelog.sql should
-be execute. To do that, it just needed to execute
+be execute. To do that, it just needed to execute::
 
     psql -U postgres -d $db_name << EOF
     \i db-changelog.sql
@@ -106,13 +111,11 @@ be execute. To do that, it just needed to execute
 Running
 =======
 
-As explained in the `overall description`__ section, there are a variety of
+As explained in the `GEi overall description`__ section, there are a variety of
 elements involved in the Software Delivery and Configuration architecture, apart from those components
 provided by this Software Delivery and Configuration GE (at least, an instance of configuration
 engine like Chef server of Puppet master). Please
 refer to their respective documentation for instructions to run them.
-
-__ `GEi overall description`_
 
 
 In order to start the software deployment and configuration service, as it is based on a
@@ -133,13 +136,13 @@ Configuration file
 ------------------
 
 The configuration of SDC is in configuration_properties table in the database.
-There, it is required to configure:
+There, it is required to configure::
 
-openstack-tcloud.keystone.url: This is the url where the keystone-proxy is deployed
-openstack-tcloud.keystone.user: the admin user
-openstack-tcloud.keystone.password: the admin password
-openstack-tcloud.keystone.tenant: the admin tenant
-sdc_manager_url: the final url, mainly http://sdc-ip:8080/sdc
+    $ openstack-tcloud.keystone.url: This is the url where the keystone-proxy is deployed
+    $ openstack-tcloud.keystone.user: the admin user
+    $ openstack-tcloud.keystone.password: the admin password
+    $ openstack-tcloud.keystone.tenant: the admin tenant
+    $ sdc_manager_url: the final url, mainly http://sdc-ip:8080/sdc
 
 
 
@@ -185,21 +188,36 @@ end-to-end funtionalities.
 
 - `SDC Aceptance Tests <https://github.com/telefonicaid/fiware-sdc/tree/develop/test>`_
 
+End to End testing
+------------------
+Although one End to End testing must be associated to the Integration Test, we can show
+here a quick testing to check that everything is up and running. It involves to obtain
+the product information storaged in the catalogue. With it, we test that the service
+is running and the database configure correctly::
+
+   https://{SDC\_IP}:{port}/sdc/rest
+
+The request to test it in the testbed should be::
+
+  curl -v -k -H 'Access-Control-Request-Method: GET' -H 'Content-Type: application xml' -H 'Accept: application/xml'
+  -H 'X-Auth-Token: 5d035c3a29be41e0b7007383bdbbec57' -H 'Tenant-Id: 60b4125450fc4a109f50357894ba2e28' -X GET 'https://localhost:8443/sdc/rest/catalog/product'
+the option -k should be included in the case you have not changed the security configuration of SDC. The result should be the product catalog.
+
+If you obtain a 401 as a response, please check the admin credentials and the connectivity from the sdc machine
+to the keystone (openstack-tcloud.keystone.url in configuration_properties table)
+
 
 Advanced topics
 ===============
 
-- `Installation and administration <doc/manuals/admin/README.rst>`_
+- `Installation and administration <doc/installation-guide.rst>`_
 
-  * `Building from sources <doc/manuals/admin/build_source.rst>`_
-  * `Running Adapter from command line <doc/manuals/admin/README.rst#from-the-command-line>`_
-  * `Logs <doc/manuals/admin/logs.rst>`_
-  * `Resources & I/O Flows <doc/manuals/admin/README.rst#resource-availability>`_
+  * `Software requirements <doc/installation-guide.rst#requirements>`_
+  * `Building from sources <doc/ininstallation-guide.rst/#install-sdc-from-source>`_
+  * `Resources & I/O Flows <doc/installation-guide.rst#resource-availability>`_
 
-- `User and programmers guide <doc/manuals/user/README.rst>`_
+- `User and programmers guide <doc/user_guide.rst>`_
 
-  * `NGSI Adapter custom probe parsers <doc/manuals/user/README.rst#ngsi-adapter-parsers>`_
-  * `Retrieval of historical data <doc/manuals/user/README.rst#monitoring-api>`_
 
 
 License
