@@ -219,8 +219,8 @@ License
 .. _FIWARE: http://www.fiware.org
 .. _FIWARE Catalogue - Software Deployment and Configuration GE: http://catalogue.fiware.org/enablers/software-deployment-configuration-sagitta
 .. _FIWARE SDC - GitHub issues: https://github.com/telefonicaid/fiware-sdc/issues/new
-.. _FIWARE SDC - User and Programmers Guide: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Monitoring_-_User_and_Programmers_Guide
-.. _FIWARE SDC - Installation and Administration Guide: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Monitoring_-_Installation_and_Administration_Guide
+.. _FIWARE SDC - User and Programmers Guide: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Software_Deployment_%26_Configuration_-_User_and_Programmers_Guide
+.. _FIWARE SDC - Installation and Administration Guide: https://forge.fiware.org/plugins/mediawiki/wiki/fiware/index.php/Software_Deployment_%26_Configuration_-_Installation_and_Administration_Guide
 .. _FIWARE SDC - Apiary: https://jsapi.apiary.io/apis/fiwaresdc/reference.html
 .. _FIWARE PaaS Manager: https://github.com/telefonicaid/fiware-paas
 
