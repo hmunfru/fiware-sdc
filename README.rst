@@ -129,14 +129,14 @@ There, it is required to configure::
     $ openstack-tcloud.keystone.user: the admin user
     $ openstack-tcloud.keystone.password: the admin password
     $ openstack-tcloud.keystone.tenant: the admin tenant
-    $ sdc_manager_url: the final url, mainly http://sdc-ip:8080/sdc
+    $ sdc_manager_url: the final url, mainly https://sdc-ip:8443/sdc
 
 
 
 Checking status
 ---------------
 
-In order to check the status of the adapter service, use the following command
+In order to check the status of the service, use the following command
 (no special privileges required):
 
 ::
@@ -200,7 +200,7 @@ Advanced topics
 - `Installation and administration <doc/installation-guide.rst>`_
 
   * `Software requirements <doc/installation-guide.rst#requirements>`_
-  * `Building from sources <doc/ininstallation-guide.rst/#install-sdc-from-source>`_
+  * `Building from sources <doc/installation-guide.rst/#install-sdc-from-source>`_
   * `Resources & I/O Flows <doc/installation-guide.rst#resource-availability>`_
 
 - `User and programmers guide <doc/user_guide.rst>`_
