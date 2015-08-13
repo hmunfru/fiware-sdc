@@ -147,9 +147,7 @@ In order to check the status of the adapter service, use the following command
 API Overview
 ============
 
-- `FIWARE SDC v1 (Apiary)`__
-
-__ `_FIWARE SDC - Apiary`_
+- `FIWARE SDC v1 (Apiary) <https://jsapi.apiary.io/apis/fiwaresdc/reference.html>`_
 
 
 Testing
