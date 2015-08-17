@@ -4,6 +4,10 @@ FIWARE SDC | Saggita
 
 | |Build Status| |Coverage Status| |help stackoverflow|
 
+.. contents:: :local:
+
+Introduction
+============
 This is the code repository for FIWARE Saggita, the reference implementation
 of the Software Deployment and Configuration GE.
 
@@ -20,6 +24,8 @@ public wiki:
 
 - `FIWARE SDC - Installation and Administration Guide`_
 - `FIWARE SDC - User and Programmers Guide`_
+
+https://github.com/telefonicaid/fiware-paas/pull/245
 
 
 GEi overall description
@@ -180,7 +186,7 @@ following curl::
 
   $ curl -v -H "Content-Type: application/json" -H "Accept: application/xml" -H "X-Auth-Token: your-token-id" -H "Tenant-Id: your-tenant-id"
     -X GET "https://saggita.lab.fi-ware.org:8443/sdc/rest/catalog/product"
-    
+
 Please have a look at the API Reference Documentation section bellow and at the programmer guide.
 
 API Reference Documentation
