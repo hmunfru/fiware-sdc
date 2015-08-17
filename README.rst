@@ -147,8 +147,6 @@ There, it is required to configure::
 In addition, to configue the SDC application inside the webserver, it is needed to change the context file.
 To do that, change sdc.xml found in distribution file and store it in folder $SDC_HOME/webapps/.
 
-See the snipet bellow to know how it works::
-
   <New id="sdc" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg>jdbc/sdc</Arg>
     <Arg>
