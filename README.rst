@@ -62,11 +62,11 @@ repository where FIWARE packages are available (and update cache, if needed)::
 
     http://repositories.testbed.fiware.org/repo/rpm/x86_64
 
-Then, use the proper tool to install the packages
+Then, use the proper tool to install the packages::
 
     $ sudo yum install fiware-sdc
 
-and the latest version will be installed. In order to install a specific version
+and the latest version will be installed. In order to install a specific version::
 
     $ sudo yum install fiware-sdc-{version}-1.noarch
 
@@ -84,6 +84,15 @@ newer version of the Software  Deployment and Configuration components:
   performs upgrades).
 - When upgrading from downloaded package files, use ``rpm -U`` in CentOS
 
+Upgrading database
+~~~~~~~~~~~~~~~~~~
+In case the database needs to be upgrade, the script db-changelog.sql should
+be execute. To do that, it just needed to execute::
+
+    psql -U postgres -d $db_name << EOF
+    \i db-changelog.sql
+
+
 Using installation script
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 The installation of fiware-sdc can be done in the easiest way by executing the script::
@@ -97,16 +106,6 @@ The script will ask you the following data to configure the configuration proper
 - the keystone url to connect fiware-sdc for the authentication process
 - the admin keystone user for the authentication process
 - the admin password for the authentication process
-
-
-Upgrading database
-~~~~~~~~~~~~~~~~~~
-In case the database needs to be upgrade, the script db-changelog.sql should
-be execute. To do that, it just needed to execute::
-
-    psql -U postgres -d $db_name << EOF
-    \i db-changelog.sql
-
 
 Running
 =======
@@ -145,7 +144,7 @@ There, it is required to configure::
     $ sdc_manager_url: the final url, mainly https://sdc-ip:8443/sdc
 
 In addition, to configue the SDC application inside the webserver, it is needed to change the context file.
-To do that, change sdc.xml found in distribution file and store it in folder $SDC_HOME/webapps/.
+To do that, change sdc.xml found in distribution file and store it in folder $SDC_HOME/webapps/::
 
   <New id="sdc" class="org.eclipse.jetty.plus.jndi.Resource">
     <Arg>jdbc/sdc</Arg>
@@ -165,9 +164,7 @@ Checking status
 ---------------
 
 In order to check the status of the service, use the following command
-(no special privileges required):
-
-::
+(no special privileges required)::
 
     $ service fiware-sdc status
 
@@ -181,10 +178,9 @@ managing the software catalogue and the installation of software in virtual mach
 For instance, it is possible to obtain the software list in the catalogue with the
 following curl::
 
-  $ curl -v -H "Content-Type: application/json" -H "Accept: application/xml" -H
-"X-Auth-Token: your-token-id" -H "Tenant-Id: your-tenant-id"
+  $ curl -v -H "Content-Type: application/json" -H "Accept: application/xml" -H "X-Auth-Token: your-token-id" -H "Tenant-Id: your-tenant-id"
     -X GET "https://saggita.lab.fi-ware.org:8443/sdc/rest/catalog/product"
-
+    
 Please have a look at the API Reference Documentation section bellow and at the programmer guide.
 
 API Reference Documentation
