@@ -28,13 +28,13 @@ import requests
 import json
 import os
 
-
+EXCLUDED_REGIONS=['Prague2', 'Waterford', 'Lannion', 'Crete', 'Karlskrona', 'Budapest', 'Spain2', 'Zurich', 'Prague']
 def get_images_filter():
     """It prints all products with metatada image, and obtain all the
        images in all regions.
     """
     KEYSTONE = os.environ.get('OS_KEYSTONE')
-    TENANT_ID = os.environ.get('OS_TENANT_NAME')
+    TENANT_ID = os.environ.get('OS_TENANT_ID')
     USERNAME = os.environ.get('OS_USERNAME')
     PASSWORD = os.environ.get('OS_PASSWORD')
 
@@ -47,7 +47,7 @@ def get_images_filter():
                               USERNAME,
                               PASSWORD)
 
-    products = get_product_with_image_filtered(endpoints['sdc']['Spain'],
+    products = get_product_with_image_filtered(endpoints['sdc']['Spain2'],
                                                token, TENANT_ID)
 
     for product in products:
@@ -60,13 +60,13 @@ def get_images_filter():
                     continue
                 except:
                     image_name = check_image_in_spain(
-                        endpoints['image']['Spain'], image, token)
+                        endpoints['image']['Spain2'], image, token)
                     if image_name is None:
                         continue
-
                     image_ids = image_ids + ' ' + image
                     for endpoint_glace in endpoints['image']:
-                        if endpoint_glace == 'Spain':
+                        print endpoint_glace
+		        if endpoint_glace in EXCLUDED_REGIONS:
                             continue
                         image_id = get_image_id_another_region(
                             endpoints['image'][endpoint_glace],
@@ -74,11 +74,11 @@ def get_images_filter():
                         if image_id is None:
                             continue
                         image_ids = image_ids + ' ' + image_id
-                    #update_metadata_image (endpoints['sdc']['Spain'],
-                    #  token, TENANT_ID, product, image_ids)
+                    update_metadata_image (endpoints['sdc']['Spain2'],
+                       token, TENANT_ID, product[0], image_ids)
             except Exception, e:
-                print 'Error with image ' + image
-        print 'product ' + product[0] + image_ids
+                print 'Error with image ' + image + ' ' + e.message
+        print 'Product ' + product[0] + ' ' + image_ids
 
 
 def get_token(url_base, tenant_id, user, password):
@@ -89,8 +89,8 @@ def get_token(url_base, tenant_id, user, password):
     :param paassword: the password
     """
     url = 'http://' + url_base + '/v2.0/tokens'
-    headers = {'Accept': 'application/json'}
-    payload = '{"auth":{"tenantName":"' + tenant_id +\
+    headers = {'Content-Type': 'application/json'}
+    payload = '{"auth":{"tenantId":"' + tenant_id +\
               '","passwordCredentials":{"username":"'\
               + user + '","password":"' + password + '"}}}'
     response = requests.post(url, headers=headers, data=payload)
@@ -159,8 +159,8 @@ def get_endpoints(url_base, tenant_id, user, password):
     :param paassword: the password
     """
     url = 'http://' + url_base + '/v2.0/tokens'
-    headers = {'Accept': 'application/json'}
-    payload = {'auth': {'tenantName': '' + tenant_id + '',
+    headers = {'Content-Type': 'application/json'}
+    payload = {'auth': {'tenantId': '' + tenant_id + '',
                         'passwordCredentials': {'username':
                         '' + user + '', 'password': '' +
                         password + ''}}}
@@ -252,7 +252,6 @@ def get_image_id_another_region(glance_url, image_name, token):
     """
     url = glance_url + '/images?property-sdc_aware=true'
     headers = {'Accept': 'application/json', 'X-Auth-Token': token}
-
     try:
         response = requests.get(url, headers=headers)
         response_json = response.json()
@@ -272,19 +271,25 @@ def update_metadata_image(sdc_url, token, vdc, product, metadata_image):
     :param product: image name
 
     """
-    url = "%s/%s" % (sdc_url, "catalog/product/"+product)
+    print 'update metadata' 
+    print product
+    url = sdc_url+ "/catalog/product/"+product
+    print url
     headers = {'X-Auth-Token': token, 'Tenant-Id': vdc,
                'Accept': "application/json",
                'Content-Type': 'application/json'}
-
+    print headers
     response = http.get(url, headers)
-
+    print url
     if response.status != 200:
         print 'error to get the product ' + str(response.status)
         return
     else:
-        payload = '{"metadata":{"key":"image","value"' + metadata_image + '"}}'
-        response = http.put(url + "/metadatas/image", headers, data=payload)
+       
+        payload = '{"key":"image","value":"' + metadata_image + '"}'
+        print payload
+        response = http.put(url + "/metadatas/image", headers, payload)
+        print response
         if response.status != 200:
             print 'error to update the product ' + product \
                   + ' ' + str(response.status)

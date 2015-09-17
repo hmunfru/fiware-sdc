@@ -50,6 +50,11 @@ def get(url, headers):
     else:
         return __do_http_req("GET", url, headers, None)
 
+def put(url, headers, payload):
+    if url.startswith('https'):
+        return __do_http_req_https("PUT", url, headers, payload)
+    else:
+        return __do_http_req("PUT", url, headers, payload)
 
 def delete(url, headers):
     if url.startswith('https'):
